@@ -1,0 +1,8 @@
+services:
+  web:
+    #command: gunicorn marswide_backend.wsgi:application --bind 0.0.0.0:8000
+    #command: gunicorn --access-logfile - --workers 33 --limit-request-line 6000 --bind unix:/run/gunicorn.sock core.asgi:application -k uvicorn.workers.UvicornWorker
+    command: gunicorn --access-logfile - --workers 33 --limit-request-line 6000 --bind 0.0.0.0:8000 marswide_backend.wsgi:application
+    environment:
+      DJANGO_SETTINGS_MODULE: marswide_backend.settings
+
