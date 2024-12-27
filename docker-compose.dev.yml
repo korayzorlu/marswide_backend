@@ -1,5 +1,6 @@
 services:
   web:
+    container_name: marswide_backend
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       DJANGO_SETTINGS_MODULE: core.settings

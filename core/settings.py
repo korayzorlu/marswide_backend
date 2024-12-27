@@ -10,7 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from decouple import config, Csv
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,33 +26,39 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2(%*(7%1@5#a2^#m@5g#^==5ep-7u*sqo+dy_ua2j4mg7rezcw'
+SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast = bool, default = False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast = Csv(), default = "*,www.marswide.com,marswide.com")
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+    "clearcache",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "corsheaders",
+    "simple_history",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -54,7 +66,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,18 +79,57 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
-
+#WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
+CHANNEL_LAYERS= {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+USE_RDS = config('USE_RDS', cast = bool, default = False)
+
+if USE_RDS:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            #'ENGINE': 'django_postgrespool2',
+            'NAME': 'postgres',
+            'USER': 'micho',
+            'PASSWORD': 'Novu.23.PG!',
+            'HOST': 'micho-app-db.czrnghcpuvme.eu-central-1.rds.amazonaws.com',
+            'PORT': os.getenv("PG_PORT",""),
+            "TEST": {
+                "NAME": "postgres",
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+            'default': {
+                'ENGINE': 'dj_db_conn_pool.backends.postgresql',
+                'NAME': 'marswidedb',
+                'USER': 'mars',
+                'PASSWORD': '9527',
+                'HOST': 'db',
+                'PORT': '',
+                'POOL_OPTIONS': {
+                    'POOL_SIZE': 100,
+                    'MAX_OVERFLOW': 50,
+                    'RECYCLE': 300
+                },
+                #'CONN_MAX_AGE': 30, # Bağlantı ömrü (saniye cinsinden)
+                "TEST": {
+                    "NAME": "marswidedb_test",
+                },
+            }
+    }
 
 
 # Password validation
