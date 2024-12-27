@@ -2,8 +2,10 @@ version: '3'
 
 services:
   web:
+    image: marswide_backend
     build: .
     ports:
       - "8000:8000"
     volumes:
       - .:/app
+    restart: always
