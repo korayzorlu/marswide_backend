@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements.txt /app/
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip freeze > requirements.txt
 #RUN pip install gunicorn
 
 # Copy the project files

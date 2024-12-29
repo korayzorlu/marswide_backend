@@ -1,8 +1,8 @@
 services:
   web:
-    #command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    #command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --timeout 600 --log-level debug
     #command: gunicorn --access-logfile - --workers 33 --limit-request-line 6000 --bind unix:/run/gunicorn.sock core.asgi:application -k uvicorn.workers.UvicornWorker
-    command: gunicorn --access-logfile - --workers 33 --limit-request-line 6000 --bind 0.0.0.0:8000 core.wsgi:application
+    command: gunicorn --access-logfile - --workers 5 --limit-request-line 6000 --bind 0.0.0.0:8000 core.asgi:application -k uvicorn.workers.UvicornWorker
     environment:
       DJANGO_SETTINGS_MODULE: core.settings
 

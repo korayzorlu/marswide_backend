@@ -45,8 +45,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.forms',
+    "rest_framework",
+    "rest_framework_datatables_editor",
+    "drf_multiple_model",
+    "django_filters",
+    "django_cleanup.apps.CleanupConfig",
     "corsheaders",
     "simple_history",
+    "ckeditor",
+    "ckeditor_uploader",
+    "django_celery_results",
+    "django_select2",
+    "crispy_forms",
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -85,7 +97,7 @@ CHANNEL_LAYERS= {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("db", 6380)],
         },
     },
 }
@@ -114,9 +126,9 @@ else:
     DATABASES = {
             'default': {
                 'ENGINE': 'dj_db_conn_pool.backends.postgresql',
-                'NAME': 'marswidedb',
-                'USER': 'mars',
-                'PASSWORD': '9527',
+                'NAME': str(os.getenv('PG_DB')),
+                'USER': str(os.getenv('PG_USER')),
+                'PASSWORD': str(os.getenv('PG_PASSWORD')),
                 'HOST': 'db',
                 'PORT': '',
                 'POOL_OPTIONS': {
@@ -156,7 +168,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Istanbul'
 
 USE_I18N = True
 
@@ -166,9 +178,179 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
+
+SECURE_BROWSER_XSS_FILTER = True
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+USE_S3 = config('USE_S3', cast = bool, default = False)
+
+if USE_S3:
+    AWS_ACCESS_KEY_ID=str(os.getenv('AWS_ACCESS_KEY_ID'))
+    AWS_SECRET_ACCESS_KEY=str(os.getenv('AWS_SECRET_ACCESS_KEY'))
+    AWS_STORAGE_BUCKET_NAME="michoapp-bucket"
+    AWS_S3_REGION_NAME= 'eu-central-1'
+    AWS_DEFAULT_ACL= None
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    DEFAULT_FILE_STORAGE= 'core.settings.s3utils.PublicMediaStorage'
+    STATICFILES_STORAGE= 'core.settings.s3utils.StaticStorage'
+    
+    STATIC_LOCATION = 'static'
+    PUBLIC_MEDIA_LOCATION= "media"
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+else:
+    STATIC_URL = "/static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Rest Framework
+
+REST_FRAMEWORK = {
+    # 'DATE_INPUT_FORMATS': "%d %b %Y",
+    'DATE_FORMAT': "%d.%m.%Y",
+    'DATETIME_FORMAT': "%d.%m.%Y %H:%M",
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework_datatables.filters.DatatablesFilterBackend',
+        'rest_framework_datatables_editor.filters.DatatablesFilterBackend'
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_datatables.renderers.DatatablesRenderer',
+        'rest_framework_datatables_editor.renderers.DatatablesRenderer'
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework_datatables_editor.pagination.DatatablesPageNumberPagination',
+    'PAGE_SIZE': 200,
+}
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Celery
+
+CELERY_TIMEZONE = "Europe/Istanbul"
+#CELERY_TASK_TRACK_STARTED = True
+#CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+
+# Proxy
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Caches
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'qr-code': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'qr-code-cache',
+        'TIMEOUT': 3600
+    },
+    "select2": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis:db:6380/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    'staticfiles': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'staticfiles-filehashes'
+    }
+}
+
+# Logging
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} - {asctime} - {module} - {process:d} - {thread:d} - {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "debug.log"),
+            "formatter": "verbose",
+            "when" : "midnight",
+            "interval" : 1,
+            "backupCount" : 7,
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        'channels': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+# Maintenance
+
+MAINTENANCE_MODE = config('MAINTENANCE_MODE', cast = bool, default = False)
+
+# Cors for react
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+
+# Ckeditor
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',  # Kullanılacak araç çubuğu
+        'height': 300,
+        'width': '100%',
+        'removePlugins': 'stylesheetparser',  # İstenmeyen özellikleri kaldırabilirsiniz
+        'extraPlugins': 'codesnippet',  # Ek özellikler ekleyebilirsiniz
+    },
+}
+
+# Select2
+
+SELECT2_CACHE_BACKEND = "select2"
+
+# Iframe
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Template
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
+# Access
+
+os.environ['IP'] = str(os.getenv('IP'))
