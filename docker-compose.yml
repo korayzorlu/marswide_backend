@@ -1,4 +1,4 @@
-version: '3'
+#version: '3'
 
 services:
   redis:
@@ -9,6 +9,15 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5673:5672"  # RabbitMQ için mesaj kuyruğu portu
+      - "15673:15672"  # RabbitMQ yönetim paneli portu
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
   web:
     container_name: marswide_backend
     image: marswide_backend
@@ -20,6 +29,15 @@ services:
     restart: always
     env_file:
       - .env
+  celery:
+    build:
+      context: .
+    container_name: celery
+    command: celery -A core worker -l INFO
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
   db:
     image: postgres:16
     container_name: postgres_db

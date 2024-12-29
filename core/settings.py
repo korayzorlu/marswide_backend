@@ -242,6 +242,9 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Celery
 
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//' # Rabbitmq için
+#CELERY_BROKER_URL = 'redis://redis:6379/0' # Redis için
+
 CELERY_TIMEZONE = "Europe/Istanbul"
 #CELERY_TASK_TRACK_STARTED = True
 #CELERY_TASK_TIME_LIMIT = 30 * 60
