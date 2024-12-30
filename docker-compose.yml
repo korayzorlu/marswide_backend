@@ -9,6 +9,7 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+    restart: always
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -18,6 +19,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    restart: always
   web:
     container_name: marswide_backend
     image: marswide_backend
@@ -35,9 +37,20 @@ services:
     container_name: celery
     command: celery -A core worker -l INFO
     depends_on:
-      - redis
+      - rabbitmq
     volumes:
       - .:/app
+    restart: always
+  celery-beat:
+    image: marswide_backend:latest  # Django uygulamanın image adı
+    container_name: celery_beat
+    command: celery -A core beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - rabbitmq
+      - web
+    volumes:
+      - .:/app
+    restart: always
   db:
     image: postgres:16
     container_name: postgres_db
