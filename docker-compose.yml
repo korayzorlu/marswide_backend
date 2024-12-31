@@ -79,15 +79,6 @@ services:
     depends_on:
       - web
     restart: always
-  certbot:
-    image: certbot/certbot:latest
-    container_name: certbot
-    volumes:
-      - ./nginx/certificates:/etc/letsencrypt
-    entrypoint: certbot certonly --manual -d marswide.com -d www.marswide.com
-    deploy:
-      restart_policy:
-        condition: any
 volumes:
   postgres_data:
   redis_data:
