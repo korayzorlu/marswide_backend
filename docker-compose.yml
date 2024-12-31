@@ -74,7 +74,6 @@ services:
       - ./staticfiles:/staticfiles
       - ./nginx/certificates:/etc/ssl/certs
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./.env:/etc/nginx/.env:ro
     environment:
       - NGINX_SERVER_NAME_1=marswide.com
       - NGINX_SERVER_NAME_2=www.marswide.com
