@@ -74,6 +74,7 @@ services:
       - ./staticfiles:/staticfiles
       - ./nginx/certificates:/etc/ssl/certs
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
     environment:
       NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx
       NGINX_SERVER_NAME_1: marswide.com
