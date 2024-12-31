@@ -74,6 +74,7 @@ services:
       - ./staticfiles:/staticfiles
       - ./nginx/certificates:/etc/ssl/certs
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./.env:/etc/nginx/.env:ro
     ports:
       - "80:80"
       - "443:443"
