@@ -84,7 +84,7 @@ services:
     container_name: certbot
     volumes:
       - ./nginx/certificates:/etc/letsencrypt
-    entrypoint: /bin/sh -c 'while :; do certbot renew --non-interactive --quiet; sleep 12h; done'
+    entrypoint: certbot certonly --manual -d marswide.com -d www.marswide.com
     deploy:
       restart_policy:
         condition: any
