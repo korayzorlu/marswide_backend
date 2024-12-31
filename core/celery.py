@@ -20,30 +20,3 @@ app.autodiscover_tasks()
 def debug_task(self):
     print(f'Request: {self.request!r}')
 
-#zamanlanmış görevler crontab(minute=0, hour='*/1')
-app.conf.beat_schedule = {
-    'exchange-rates-update': {
-        'task': 'user.tasks.exchangeUpdate',
-        'schedule': crontab(minute=0, hour=0),
-        'args': '',
-        'options': {
-            'expires': 15.0,
-        },
-    },
-    'dail_financial_report_send': {
-        'task': 'report.tasks.sendMailDailyFinancialReport',
-        'schedule': crontab(minute=35, hour=17),
-        'args': '',
-        'options': {
-            'expires': 30.0,
-        },
-    },
-    'dail_financial_report_send_test': {
-        'task': 'report.tasks.sendMailDailyFinancialReportTest',
-        'schedule': crontab(minute=11, hour=12),
-        'args': '',
-        'options': {
-            'expires': 30.0,
-        },
-    },
-}
