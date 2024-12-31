@@ -75,6 +75,13 @@ services:
       - ./nginx/certificates:/etc/ssl/certs
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./.env:/etc/nginx/.env:ro
+      - ./templates:/etc/nginx/templates
+    environment:
+      - NGINX_SERVER_NAME_1=marswide.com
+      - NGINX_SERVER_NAME_2=www.marswide.com
+      - NGINX_PROXY_PASS=http://marswide_backend:8000
+      - NGINX_SSL_CERTIFICATE=/etc/letsencrypt/live/marswide.com/fullchain.pem
+      - NGINX_SSL_CERTIFICATE_KEY=/etc/letsencrypt/live/marswide.com/privkey.pem
     ports:
       - "80:80"
       - "443:443"
