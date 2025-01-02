@@ -66,9 +66,6 @@ services:
     restart: always
     env_file:
       - .env
-  nginx:
-    image: nginx:latest
-    container_name: nginx
 volumes:
   postgres_data:
   redis_data:
