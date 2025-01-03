@@ -22,7 +22,7 @@ Django==5.1.4
 django-appconf==1.0.6
 django-celery-beat==2.7.0
 django-celery-results==2.5.1
-django-ckeditor==6.7.2
+django-ckeditor-5==0.2.15
 django-cleanup==9.0.0
 django-clearcache==1.2.1
 django-cors-headers==4.6.0
