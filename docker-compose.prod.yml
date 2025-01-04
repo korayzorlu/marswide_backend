@@ -16,7 +16,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     ports:
       - "81:80"
-      - "444:443"
+      - "443:443"
     depends_on:
       - web
     restart: always
