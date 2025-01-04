@@ -15,8 +15,8 @@ services:
       - ./nginx/certificates:/etc/ssl/certs
       - /etc/letsencrypt:/etc/letsencrypt:ro
     ports:
-      - "81:80"
-      - "444:443"
+      - "80:80"
+      - "443:443"
     depends_on:
       - web
     restart: always
