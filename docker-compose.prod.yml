@@ -21,3 +21,6 @@ services:
     restart: always
     networks:
       - marswide_network
+networks:
+  marswide_network:
+    external: true
