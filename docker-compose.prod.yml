@@ -18,9 +18,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    depends_on:
+      - web
     restart: always
     networks:
       - marswide_network
-networks:
-  marswide_network:
-    external: true
