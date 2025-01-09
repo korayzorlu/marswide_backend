@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     "django_select2",
     "crispy_forms",
     "crispy_bootstrap5",
-    "user",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -328,7 +328,7 @@ MAINTENANCE_MODE = config('MAINTENANCE_MODE', cast = bool, default = False)
 # Cors for react
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CSRF_TRUSTED_ORIGINS = ["*"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
 
 # Ckeditor
 
