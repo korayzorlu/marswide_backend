@@ -330,8 +330,9 @@ MAINTENANCE_MODE = config('MAINTENANCE_MODE', cast = bool, default = False)
 
 # Cors for react
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_ALLOW_ALL = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast = Csv(), default = "https://marswide.com,https://www.marswide.com")
+#CSRF_TRUSTED_ORIGINS = ["http://marside_frontend:3000"]
 
 # Ckeditor
 
