@@ -43,9 +43,6 @@ services:
     networks:
       - marswide_network
 
-  nginx:
-    image: nginx:latest
-    container_name: nginx
   celery:
     build:
       context: .

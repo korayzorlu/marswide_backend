@@ -239,6 +239,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 200,
 }
 
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Celery
