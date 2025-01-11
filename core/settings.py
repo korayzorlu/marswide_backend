@@ -63,9 +63,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -215,12 +215,19 @@ else:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Redirect
+
+
+
 # Rest Framework
 
 REST_FRAMEWORK = {
     # 'DATE_INPUT_FORMATS': "%d %b %Y",
     'DATE_FORMAT': "%d.%m.%Y",
     'DATETIME_FORMAT': "%d.%m.%Y %H:%M",
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
     ],
@@ -331,8 +338,18 @@ MAINTENANCE_MODE = config('MAINTENANCE_MODE', cast = bool, default = False)
 # Cors for react
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast = Csv(), default = "https://marswide.com,https://www.marswide.com")
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast = Csv(), default = "https://marswide.com,https://www.marswide.com")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("CORS_ALLOWED_ORIGINS", "") else []
+
+CSRF_COOKIE_HTTPONLY = True
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if os.getenv("CSRF_TRUSTED_ORIGINS", "") else []
+
+
+
+
+
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ORIGIN_ALLOW_ALL = True
+# CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 
 # Ckeditor
 
