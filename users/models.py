@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
@@ -11,8 +12,11 @@ class Profile(models.Model):
     """
     This model represents the profile info of Internal Personals.
     """
-    THEME_CHOICES = (('dark', ('Dark')), ('light', ('Light')))
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, blank=True)
+
+    THEME_CHOICES = (('dark', ('Dark')), ('light', ('Light')))
+    theme = models.CharField(_("Theme"), max_length=25, default='light', choices=THEME_CHOICES, blank=True, null=True)
     
     
     created_at = models.DateTimeField(auto_now_add=True, null=True)

@@ -337,7 +337,7 @@ MAINTENANCE_MODE = config('MAINTENANCE_MODE', cast = bool, default = False)
 
 # Cors for react
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_ALLOW_ALL = False
+#CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("CORS_ALLOWED_ORIGINS", "") else []
 
 CSRF_COOKIE_HTTPONLY = True

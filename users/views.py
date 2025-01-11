@@ -21,18 +21,19 @@ class CSRFTokenGetView(View):
 
 class UserLoginView(View):
     def post(self, request, *args, **kwargs):
-        logger = logging.getLogger("django")
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
-        logger.warning("sdsg")
         user = authenticate(request, username=username, password=password)
-        print(request.POST)
         if user is not None:
             login(request, user)
-            print(request.user)
-            print("oldu lan")
             return JsonResponse({'success': True, 'message': 'Logged in successfully'})
         else:
-            print("olsun yine oldu lan")
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
+
+#@method_decorator(csrf_exempt, name='dispatch')
+class UserLogoutView(View):
+    def post(self, request, *args, **kwargs):
+        print(request.user)
+        logout(request)
+        return JsonResponse({'success': True, 'message': 'Logged out successfully'})

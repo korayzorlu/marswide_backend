@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework_datatables_editor.viewsets import DatatablesEditorModelViewSet, EditorModelMixin
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
+from rest_framework import status
 
 from .serializers import *
 
@@ -124,3 +125,37 @@ class UserList(EditorModelMixin, ModelViewSet, QueryListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+class UserProfileList(EditorModelMixin, ModelViewSet, QueryListAPIView):
+    """
+    Returns all cities
+    Use GET parameters to filter queryset
+    """
+
+    serializer_class = UserProfileListSerializer
+    filterset_fields = {
+                        'user': ['exact','in', 'isnull'],
+    }
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    
+    def get_queryset(self):
+        """
+        Optionally restricts the returned requests to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+
+        custom_related_fields = ["user"]
+
+        queryset = Profile.objects.select_related(*custom_related_fields).all().order_by("user__username")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["user__username"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+    
