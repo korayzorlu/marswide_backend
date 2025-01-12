@@ -346,7 +346,6 @@ CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if os.ge
 
 
 
-
 # CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_ALLOW_ALL = True
 # CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
