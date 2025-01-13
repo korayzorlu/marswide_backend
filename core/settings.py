@@ -217,7 +217,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # auth
 
-AUTH_USER_MODEL = 'users.User'
+#AUTH_USER_MODEL = 'users.User'
 
 
 
