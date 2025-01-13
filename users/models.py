@@ -10,10 +10,10 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 
-# class User(AbstractUser):
-#     email = models.EmailField(unique=True) 
-#     USERNAME_FIELD = 'email'
-#     REQUIRED_FIELDS = ['username','first_name','last_name']
+class User(AbstractUser):
+    email = models.EmailField(unique=True) 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username','first_name','last_name']
 
 # class Profile(models.Model):
 #     """
