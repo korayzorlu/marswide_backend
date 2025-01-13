@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.views import View
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
@@ -8,6 +10,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
+
+from .models import *
 
 # Create your views here.
 
@@ -22,11 +26,16 @@ class CSRFTokenGetView(View):
 class UserLoginView(View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
-        username = data.get('username')
+        email = data.get('email')
         password = data.get('password')
-        user = authenticate(request, email=username, password=password)
+        remember = data.get('remember')
+
+        user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
+            if not remember:
+                request.session.set_expiry(0)
+                request.session.modified = True
             return JsonResponse({'success': True, 'message': 'Logged in successfully'})
         else:
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
@@ -41,8 +50,36 @@ class UserLogoutView(LoginRequiredMixin,View):
 class UserRegisterView(View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
-        username = data.get('username')
+        email = data.get('email')
         password = data.get('password')
+        passwordConfirmation = data.get('passwordConfirmation')
+        firstName = data.get('firstName')
+        lastName = data.get('lastName')
+        refCode = data.get('refCode')
 
+        if not email or not password or not passwordConfirmation or not firstName or not lastName or not refCode:
+            return JsonResponse({'error': 'Register failed! Fill required fields.'}, status=400)
         
-        return JsonResponse({'success': True, 'message': 'Logged in successfully'})
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({'error': 'Register failed! This email address is already in use.'}, status=400)
+        
+        if password != passwordConfirmation:
+            return JsonResponse({'error': 'Register failed! Please make sure your passwords match.'}, status=400)
+        
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            return JsonResponse({'error': ' '.join(e.messages)}, status=400)
+        
+        if refCode != "MARS2030SDXF":
+            return JsonResponse({'error': 'Register failed! Invalid reference code'}, status=400)
+
+        user = User.objects.create_user(email=email, username=email, password=password)
+        user.save()
+
+        profile = Profile.objects.create(user = user)
+        profile.save()
+
+        user = authenticate(request, email=email, password=password)
+        login(request, user)
+        return JsonResponse({'success': True, 'message': 'Registered successfully'}, status=201)
