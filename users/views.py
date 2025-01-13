@@ -32,8 +32,17 @@ class UserLoginView(View):
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
 
 #@method_decorator(csrf_exempt, name='dispatch')
-class UserLogoutView(View):
+class UserLogoutView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         print(request.user)
         logout(request)
         return JsonResponse({'success': True, 'message': 'Logged out successfully'})
+    
+class UserRegisterView(View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+        
+        
+        return JsonResponse({'success': True, 'message': 'Logged in successfully'})
