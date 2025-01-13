@@ -9,4 +9,4 @@ from .models import *
 #     list_display = ['email', 'first_name', 'last_name', 'is_active']
 
 admin.site.register(User, UserAdmin)
-#admin.site.register(Profile)
+admin.site.register(Profile)
