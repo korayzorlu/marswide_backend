@@ -36,16 +36,15 @@ class UserLoginView(View):
             if not remember:
                 request.session.set_expiry(0)
                 request.session.modified = True
-            return JsonResponse({'success': True, 'message': 'Logged in successfully'})
+            return JsonResponse({'success': True}, status=200)
         else:
-            return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
+            return JsonResponse({'message': 'Login failed! Invalid username or password.'}, status=401)
 
 #@method_decorator(csrf_exempt, name='dispatch')
 class UserLogoutView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
-        print(request.user)
         logout(request)
-        return JsonResponse({'success': True, 'message': 'Logged out successfully'})
+        return JsonResponse({'success': True})
     
 class UserRegisterView(View):
     def post(self, request, *args, **kwargs):
@@ -58,21 +57,21 @@ class UserRegisterView(View):
         refCode = data.get('refCode')
 
         if not email or not password or not passwordConfirmation or not firstName or not lastName or not refCode:
-            return JsonResponse({'error': 'Register failed! Fill required fields.'}, status=400)
+            return JsonResponse({'message': 'Register failed! Fill required fields.'}, status=400)
         
         if User.objects.filter(email=email).exists():
-            return JsonResponse({'error': 'Register failed! This email address is already in use.'}, status=400)
+            return JsonResponse({'message': 'Register failed! This email address is already in use.'}, status=400)
         
         if password != passwordConfirmation:
-            return JsonResponse({'error': 'Register failed! Please make sure your passwords match.'}, status=400)
+            return JsonResponse({'message': 'Register failed! Please make sure your passwords match.'}, status=400)
         
         try:
             validate_password(password)
         except ValidationError as e:
-            return JsonResponse({'error': ' '.join(e.messages)}, status=400)
+            return JsonResponse({'message': ' '.join(e.messages)}, status=400)
         
         if refCode != "MARS2030SDXF":
-            return JsonResponse({'error': 'Register failed! Invalid reference code'}, status=400)
+            return JsonResponse({'message': 'Register failed! Invalid reference code'}, status=400)
 
         user = User.objects.create_user(email=email, username=email, password=password)
         user.save()
@@ -82,4 +81,4 @@ class UserRegisterView(View):
 
         user = authenticate(request, email=email, password=password)
         login(request, user)
-        return JsonResponse({'success': True, 'message': 'Registered successfully'}, status=201)
+        return JsonResponse({'success': True}, status=201)
