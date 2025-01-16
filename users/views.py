@@ -36,7 +36,7 @@ class UserLoginView(View):
             if not remember:
                 request.session.set_expiry(0)
                 request.session.modified = True
-            return JsonResponse({'success': True}, status=200)
+            return JsonResponse({'success': True, 'theme': user.profile.theme}, status=200)
         else:
             return JsonResponse({'message': 'Login failed! Invalid username or password.'}, status=401)
 
@@ -55,6 +55,7 @@ class UserRegisterView(View):
         firstName = data.get('firstName')
         lastName = data.get('lastName')
         refCode = data.get('refCode')
+        username = email.split('@')[0]
 
         if not email or not password or not passwordConfirmation or not firstName or not lastName or not refCode:
             return JsonResponse({'message': 'Register failed! Fill required fields.'}, status=400)
@@ -73,7 +74,7 @@ class UserRegisterView(View):
         if refCode != "MARS2030SDXF":
             return JsonResponse({'message': 'Register failed! Invalid reference code'}, status=400)
 
-        user = User.objects.create_user(email=email, username=email, password=password)
+        user = User.objects.create_user(email=email, username=username, password=password)
         user.save()
 
         profile = Profile.objects.create(user = user)

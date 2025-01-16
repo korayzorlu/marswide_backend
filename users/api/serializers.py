@@ -6,6 +6,7 @@ from users.models import *
 class UserListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
+    email = serializers.CharField()
     name = serializers.SerializerMethodField()
     profile = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
