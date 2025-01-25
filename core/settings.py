@@ -246,6 +246,14 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework_datatables_editor.pagination.DatatablesPageNumberPagination',
     'PAGE_SIZE': 200,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',  # anonim kullanıcılar için limit
+        'rest_framework.throttling.UserRateThrottle',  # giriş yapmış kullanıcılar için limit
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/second',  # anonim kullanıcılar için limit
+        'user': '5/second',  # kullanıcı başına günlük limit
+    }
 }
 
 
@@ -382,3 +390,13 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 # Access
 
 os.environ['IP'] = str(os.getenv('IP'))
+
+# Email
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Örneğin Gmail kullanıyorsanız
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'info@marswide.com'
+EMAIL_HOST_PASSWORD = 'nyhg dwwp suyz zsod'  # Gmail için uygulama şifresi kullanın
+DEFAULT_FROM_EMAIL = 'Marswide <info@marswide.com>'
