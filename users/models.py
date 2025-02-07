@@ -22,9 +22,11 @@ class Profile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, blank=True)
 
+    image = models.ImageField(_("Image"), upload_to='media/docs/users/ ', null=True, blank=True,
+                              help_text=_("Please upload a square image, otherwise center will be cropped."))
+
     THEME_CHOICES = (('dark', ('Dark')), ('light', ('Light')))
     theme = models.CharField(_("Theme"), max_length=25, default='light', choices=THEME_CHOICES, blank=True, null=True)
-    
     
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

@@ -30,6 +30,7 @@ urlpatterns = [
     path('admin/clearcache/', include('clearcache.urls')),
 
     path('api/users/', include("users.urls")),
+    path('api/companies/', include("companies.urls")),
 
     path('password-reset/', PasswordResetView.as_view(), name='password_reset'),
     path('password-reset/done/', PasswordResetDoneView.as_view(), name='password_reset_done'),

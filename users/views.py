@@ -15,6 +15,8 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 import os
 
@@ -22,10 +24,9 @@ import json
 import logging
 
 from .models import *
+from subscriptions.models import Subscription
 
 # Create your views here.
-
-
 
 class CSRFTokenGetView(View):
     def get(self, request, *args, **kwargs):
@@ -58,6 +59,7 @@ class UserLoginView(View):
                 'last_name': user.last_name,
                 'name' : user.first_name + " " + user.last_name if user else '',
                 'profile':user.profile.pk,
+                'image': request.build_absolute_uri(user.profile.image.url) if user.profile.image else "",
                 'theme': user.profile.theme,
                 'userSourceCompanies': []
             }
@@ -104,6 +106,9 @@ class UserRegisterView(View):
 
         profile = Profile.objects.create(user = user)
         profile.save()
+
+        subscription = Subscription.objects.create(user = user)
+        subscription.save()
 
         user = authenticate(request, email=email, password=password)
         login(request, user)
@@ -211,3 +216,31 @@ class UserPasswordResetView(View):
                 return JsonResponse({'message': 'Invalid header.'}, status=400)
 
         return JsonResponse({'message': 'Invalid email.'}, status=400)
+    
+class UserProfileSettingsView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.POST.get('data', '{}'))
+        image = request.FILES.get('image')
+        removeImage = data.get('removeImage')
+
+        profile = request.user.profile
+
+        if image:
+            old_image_path = profile.image.path if profile.image else ""
+            if os.path.exists(old_image_path):
+                os.remove(old_image_path)
+            
+            filePath = f"images/users/{request.user.id}/{image.name}"
+            savedPath = default_storage.save(filePath, ContentFile(image.read()))
+            profile.image = savedPath
+
+        if removeImage:
+            old_image_path = profile.image.path if profile.image else ""
+            if os.path.exists(old_image_path):
+                os.remove(old_image_path)
+
+            profile.image = None
+
+        profile.save()
+
+        return JsonResponse({'success': True}, status=200)

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.utils import html, model_meta, representation
 
 from users.models import *
+from subscriptions.models import Subscription
 
 class UserListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -11,6 +12,8 @@ class UserListSerializer(serializers.Serializer):
     email = serializers.CharField()
     name = serializers.SerializerMethodField()
     profile = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    subscription = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
     userSourceCompanies = serializers.SerializerMethodField()
     
@@ -19,6 +22,18 @@ class UserListSerializer(serializers.Serializer):
     
     def get_profile(self, obj):
         return obj.profile.pk if obj.profile else ''
+    
+    def get_subscription(self, obj):
+        return obj.subscription.get_type_display() if obj.subscription else ''
+    
+    def get_image(self, obj):
+        if obj.profile and obj.profile.image and obj.profile.image.name:
+            request = self.context.get('request')
+            image_url = obj.profile.image.url
+            if request is not None:
+                return request.build_absolute_uri(image_url)
+            return image_url
+        return ''
     
     def get_theme(self, obj):
         return obj.profile.theme if obj.profile else ''
@@ -69,3 +84,5 @@ class UserProfileListSerializer(serializers.Serializer):
             field.set(value)
         
         return instance
+    
+
