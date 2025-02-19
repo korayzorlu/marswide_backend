@@ -77,10 +77,10 @@ class QueryListAPIView(generics.ListAPIView):
                 self._paginator = None
         return self._paginator
 
-class CompanyList(ModelViewSet, QueryListAPIView):
-    serializer_class = CompanyListSerializer
+class PartnerList(ModelViewSet, QueryListAPIView):
+    serializer_class = PartnerListSerializer
     filterset_fields = {
-                        'user': ['exact','in', 'isnull'],
+                        'company': ['exact','in', 'isnull'],
     }
     filter_backends = [OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'
@@ -88,39 +88,16 @@ class CompanyList(ModelViewSet, QueryListAPIView):
     permission_classes = [SubscriptionPermission]
     
     def get_queryset(self):
-        custom_related_fields = ["user"]
+        active_company_id = self.request.query_params.get('active_company')
+        active_company = self.request.user.user_companies.filter(id = active_company_id).first()
 
-        queryset = Company.objects.select_related(*custom_related_fields).filter(company_users__is_admin = True, company_users__user = self.request.user).order_by("name")
+        custom_related_fields = ["company"]
 
-        query = self.request.query_params.get('search[value]', None)
-        if query:
-            search_fields = ["name","formalName","user__email"]
-            
-            q_objects = Q()
-            for field in search_fields:
-                q_objects |= Q(**{f"{field}__icontains": query})
-            
-            queryset = queryset.filter(q_objects)
-        return queryset
-
-class UserCompanyList(ModelViewSet, QueryListAPIView):
-    serializer_class = UserCompanyListSerializer
-    filterset_fields = {
-                        'user': ['exact','in', 'isnull'],
-    }
-    filter_backends = [OrderingFilter,DjangoFilterBackend]
-    ordering_fields = '__all__'
-    required_subscription = "free"
-    permission_classes = [SubscriptionPermission]
-    
-    def get_queryset(self):
-        custom_related_fields = ["user","company"]
-
-        queryset = UserCompany.objects.select_related(*custom_related_fields).filter(user = self.request.user).order_by("company__name")
+        queryset = Partner.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("name")
 
         query = self.request.query_params.get('search[value]', None)
         if query:
-            search_fields = ["company__name","user__email"]
+            search_fields = ["name","formalName","company__name"]
             
             q_objects = Q()
             for field in search_fields:

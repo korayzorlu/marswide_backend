@@ -43,12 +43,14 @@ class AddCompanyView(LoginRequiredMixin,View):
         company.save()
 
         user_companies = request.user.user_companies.all()
-        user_companies.update(is_active = False)
+        if user_companies:
+            user_companies.update(is_active = False)
 
         user_company = UserCompany.objects.create(
             user = request.user,
             company = company,
-            is_active = True
+            is_active = True,
+            is_admin = True
         )
 
         user_company.save()
@@ -67,7 +69,7 @@ class UpdateCompanyView(LoginRequiredMixin,View):
         if not name or not formal_name:
             return JsonResponse({'message': 'Register failed! Fill required fields.'}, status=400)
         
-        company = Company.objects.filter(id = int(id), user = request.user).first()
+        company = Company.objects.filter(id = int(id), company_users__is_admin = True, company_users__user = self.request.user).first()
 
         if not company:
             return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
@@ -100,11 +102,22 @@ class DeleteCompanyView(LoginRequiredMixin,View):
         data = json.loads(request.body)
         id = data.get('id')
         
-        company = Company.objects.filter(id = int(id), user = request.user).first()
+        user_companies = UserCompany.objects.filter(user = request.user).order_by("company__name")
+        user_company = user_companies.filter(id = int(id)).first()
+
+        company = Company.objects.filter(id = user_company.company.id, user = request.user).first()
 
         if not company:
             return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+        
+        user_companies.update(is_active = False)
 
         company.delete()
 
+        new_active_user_company = user_companies.first()
+        if new_active_user_company:
+            new_active_user_company.is_active = True
+            new_active_user_company.save()
+
         return JsonResponse({'success': True}, status=200)
+    

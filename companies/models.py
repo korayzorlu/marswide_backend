@@ -28,6 +28,7 @@ class UserCompany(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_companies")
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_users")
     is_active = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'company')  # Aynı kullanıcı aynı şirkete birden fazla kez atanamaz.
@@ -35,3 +36,4 @@ class UserCompany(models.Model):
 
     def __str__(self):
         return str(self.company.name)
+    

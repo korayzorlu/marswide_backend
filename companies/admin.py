@@ -21,9 +21,9 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(UserCompany)
 class UserCompanyAdmin(admin.ModelAdmin):
-    list_display = ["user","company", "is_active"]
+    list_display = ["user","company", "is_active", "is_admin"]
     list_display_links = ["company"]
-    search_fields = ["user__email","company__name","is_active"]
+    search_fields = ["user__email","company__name","is_active","is_admin"]
     list_filter = []
     inlines = []
     ordering = ["-id"]
@@ -36,3 +36,4 @@ class UserCompanyAdmin(admin.ModelAdmin):
     
     class Meta:
         model = UserCompany
+

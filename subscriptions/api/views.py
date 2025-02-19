@@ -12,8 +12,6 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework import status
 
-from core.permissions import SubscriptionPermission,BlockBrowserAccessPermission,RequireCustomHeaderPermission
-
 from .serializers import *
 
 class QueryListAPIView(generics.ListAPIView):
@@ -77,50 +75,32 @@ class QueryListAPIView(generics.ListAPIView):
                 self._paginator = None
         return self._paginator
 
-class CompanyList(ModelViewSet, QueryListAPIView):
-    serializer_class = CompanyListSerializer
+class MenuItemList(EditorModelMixin, ModelViewSet, QueryListAPIView):
+    """
+    Returns all cities
+    Use GET parameters to filter queryset
+    """
+
+    serializer_class = MenuItemListSerializer
     filterset_fields = {
-                        'user': ['exact','in', 'isnull'],
+                        'type': ['exact','in', 'isnull'],
     }
     filter_backends = [OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'
-    required_subscription = "free"
-    permission_classes = [SubscriptionPermission]
     
     def get_queryset(self):
-        custom_related_fields = ["user"]
+        """
+        Optionally restricts the returned requests to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
 
-        queryset = Company.objects.select_related(*custom_related_fields).filter(company_users__is_admin = True, company_users__user = self.request.user).order_by("name")
+        custom_related_fields = []
+
+        queryset = Subscription.objects.select_related(*custom_related_fields).filter(user = self.request.user).order_by("user__username")
 
         query = self.request.query_params.get('search[value]', None)
         if query:
-            search_fields = ["name","formalName","user__email"]
-            
-            q_objects = Q()
-            for field in search_fields:
-                q_objects |= Q(**{f"{field}__icontains": query})
-            
-            queryset = queryset.filter(q_objects)
-        return queryset
-
-class UserCompanyList(ModelViewSet, QueryListAPIView):
-    serializer_class = UserCompanyListSerializer
-    filterset_fields = {
-                        'user': ['exact','in', 'isnull'],
-    }
-    filter_backends = [OrderingFilter,DjangoFilterBackend]
-    ordering_fields = '__all__'
-    required_subscription = "free"
-    permission_classes = [SubscriptionPermission]
-    
-    def get_queryset(self):
-        custom_related_fields = ["user","company"]
-
-        queryset = UserCompany.objects.select_related(*custom_related_fields).filter(user = self.request.user).order_by("company__name")
-
-        query = self.request.query_params.get('search[value]', None)
-        if query:
-            search_fields = ["company__name","user__email"]
+            search_fields = ["user__username"]
             
             q_objects = Q()
             for field in search_fields:

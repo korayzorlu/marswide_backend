@@ -2,13 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
-
 from django.db import models
 from django.contrib.auth.models import User
-
-# Create your models here.
-
 
 class User(AbstractUser):
     email = models.EmailField(unique=True) 
@@ -16,10 +11,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username','first_name','last_name']
 
 class Profile(models.Model):
-    """
-    This model represents the profile info of Internal Personals.
-    """
-    
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, blank=True)
 
     image = models.ImageField(_("Image"), upload_to='media/docs/users/ ', null=True, blank=True,
