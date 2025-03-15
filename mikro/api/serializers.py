@@ -5,6 +5,7 @@ from rest_framework.utils import html, model_meta, representation
 class CariHesapHareketleriListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     tarih = serializers.DateTimeField(format="%d.%m.%Y %H:%M:%S")
+    belgeTarih = serializers.DateTimeField(format="%d.%m.%Y %H:%M:%S")
     kod = serializers.CharField()
     cari = serializers.CharField()
     evrakTip = serializers.CharField()

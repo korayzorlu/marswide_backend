@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.forms',
+    "channels",
     "rest_framework",
     "rest_framework_datatables_editor",
     "drf_multiple_model",
@@ -64,6 +65,8 @@ INSTALLED_APPS = [
     "companies",
     "mikro",
     "partners",
+    "notifications",
+    "data",
 ]
 
 MIDDLEWARE = [
@@ -102,7 +105,7 @@ CHANNEL_LAYERS= {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("db", 6380)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
@@ -360,8 +363,6 @@ CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if os.ge
 SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE")  # veya 'Lax' ya da 'Strict'
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE")
 
-
-
 # CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_ALLOW_ALL = True
 # CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
@@ -404,3 +405,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'info@marswide.com'
 EMAIL_HOST_PASSWORD = 'nyhg dwwp suyz zsod'  # Gmail için uygulama şifresi kullanın
 DEFAULT_FROM_EMAIL = 'Marswide <info@marswide.com>'
+
+# Domain
+
+BACKEND_URL = str(os.getenv('BACKEND_URL'))
+FRONTEND_URL = str(os.getenv('FRONTEND_URL'))

@@ -17,16 +17,27 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.core.signing import TimestampSigner,BadSignature, SignatureExpired
+from django.urls import reverse
 
 import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+from dotenv import load_dotenv
+load_dotenv()
 
 import json
 import logging
+from twilio.rest import Client
 
 from .models import *
 from subscriptions.models import Subscription
+from data.models import Country
 
 # Create your views here.
+
+signer = TimestampSigner()
 
 class CSRFTokenGetView(View):
     def get(self, request, *args, **kwargs):
@@ -52,9 +63,24 @@ class UserLoginView(View):
             if not remember:
                 request.session.set_expiry(0)
                 request.session.modified = True
+
+            account_sid = str(os.getenv('TWILIO_ACCOUNT_SID'))
+            auth_token = str(os.getenv('TWILIO_AUTH_TOKEN'))
+            client = Client(account_sid, auth_token)
+
+            service = client.verify.v2.services.create(
+                friendly_name="TWilio Verify Service"
+            )
+
+            if service.sid:
+                user.verify_sid = service.sid
+                user.save()
+
             user_data = {
                 'id': user.id,
                 'email': user.email,
+                'is_email_verified' : user.is_email_verified,
+                'phone_number': user.phone_number,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'name' : user.first_name + " " + user.last_name if user else '',
@@ -134,13 +160,106 @@ class UserEmailSettingsView(LoginRequiredMixin,View):
 
         if User.objects.filter(email=email).exclude(id=request.user.id).exists():
             return JsonResponse({'message': 'This email address is already in use.'}, status=400)
+        
+        token = signer.sign(request.user.email)
+        verification_url = f"{os.getenv("EMAIL_PROTOCOL")}://{request.get_host()}/api/users/email_verification?token={token}"
 
-        user = request.user
-        user.email = email
-        user.save()
+        try:
+            subject = "Verify Your Email for Marswide"
+            message = f"Please verify your email by clicking the link below.\n\n{verification_url}"
+            from_email = "Marswide <info@marswide.com>"
+            to_email = [email]
+            
+            email_message = EmailMessage(
+                subject,
+                message,
+                from_email, 
+                to_email
+            )
+
+            email_message.body = message
+            email_message.send()
+            return JsonResponse({'success': True}, status=200)
+        except User.DoesNotExist:
+                return JsonResponse({'message': 'User not found. Please enter a valid email address.'}, status=400)
+        except BadHeaderError:
+            return JsonResponse({'message': 'Invalid header.'}, status=400)
+
+class UserEmailVerificationView(View):
+    def get(self, request, *args, **kwargs):
+        token = request.GET.get("token")
+
+        try:
+            email = signer.unsign(token, max_age=86400)
+            user = User.objects.get(email=email)
+            user.is_email_verified = True
+            user.save()
+            return JsonResponse({'message': 'Successfully verified!'}, status=200)
+        except SignatureExpired:
+                return JsonResponse({'message': 'Link expired!'}, status=400)
+        except (BadSignature, User.DoesNotExist):
+            return JsonResponse({'message': 'Invalid link.'}, status=400)
+
+class UserPhoneNumberSettingsView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        iso2 = data.get('iso2')
+        phone_number = data.get('phoneNumber')
+
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+        
+        country = Country.objects.filter(iso2 = iso2).first()
+        if not country:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+
+        if User.objects.filter(phone_country=country,phone_number=phone_number).exclude(id=request.user.id).exists():
+            return JsonResponse({'message': 'This phone number is already in use.'}, status=400)
+        
+        if User.objects.filter(phone_country=country,phone_number=phone_number).exists():
+            return JsonResponse({'message': 'Your phone number verified!'}, status=400)
+        
+        account_sid = str(os.getenv('TWILIO_ACCOUNT_SID'))
+        auth_token = str(os.getenv('TWILIO_AUTH_TOKEN'))
+        client = Client(account_sid, auth_token)
+
+        verification_check = client.verify.v2.services(request.user.verify_sid).verifications.create(to=f"{country.dial_code}{phone_number}", channel='sms')
 
         return JsonResponse({'success': True}, status=200)
     
+class UserPhoneNumberVerificationView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        iso2 = data.get('iso2')
+        phone_number = data.get('phoneNumber')
+        sms_code = data.get('smsCode')
+
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+        
+        country = Country.objects.filter(iso2 = iso2).first()
+        if not country:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+
+        if User.objects.filter(phone_country=country,phone_number=phone_number).exclude(id=request.user.id).exists():
+            return JsonResponse({'message': 'This phone number is already in use.'}, status=400)
+        
+        account_sid = str(os.getenv('TWILIO_ACCOUNT_SID'))
+        auth_token = str(os.getenv('TWILIO_AUTH_TOKEN'))
+        client = Client(account_sid, auth_token)
+
+        verification_check = client.verify.v2.services(request.user.verify_sid).verification_checks.create(to=f"{country.dial_code}{phone_number}", code=sms_code)
+        
+        if verification_check.status == "approved":
+            user = request.user
+            user.phone_country = country
+            user.phone_number = phone_number
+            user.save()
+        else:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+
+        return JsonResponse({'success': True}, status=200)
+
 class UserPasswordSettingsView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
@@ -244,3 +363,24 @@ class UserProfileSettingsView(LoginRequiredMixin,View):
         profile.save()
 
         return JsonResponse({'success': True}, status=200)
+    
+class UserInformationView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        email = data.get('email')
+
+        user = User.objects.filter(email = email).first()
+
+        if not user:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+        
+        user_data = {
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'name' : user.get_full_name(),
+                'profile':user.profile.pk,
+                'image': request.build_absolute_uri(user.profile.image.url) if user.profile.image else "",
+        }
+
+        return JsonResponse({'success': True, 'user':user_data}, status=200)

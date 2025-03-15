@@ -5,10 +5,23 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.contrib.auth.models import User
 
+from data.models import Country
+
 class User(AbstractUser):
-    email = models.EmailField(unique=True) 
+    email = models.EmailField(unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username','first_name','last_name']
+
+    is_email_verified = models.BooleanField(default=False)
+
+    phone_country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="country_users")
+    phone_number = models.CharField(_("Phone Number"), max_length=25, blank=True, null=True)
+    verify_sid = models.CharField(_("Verify SID"), max_length=50, blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['phone_country', 'phone_number'], name='unique_phone_country_number')
+        ]
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, blank=True)

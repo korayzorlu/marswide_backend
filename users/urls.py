@@ -18,6 +18,9 @@ urlpatterns = [
     path('register/', UserRegisterView.as_view(), name="register"),
 
     path('email_settings/', UserEmailSettingsView.as_view(), name="email_settings"),
+    path('email_verification/', UserEmailVerificationView.as_view(), name="email_settings"),
+    path('phone_number_settings/', UserPhoneNumberSettingsView.as_view(), name="phone_number_settings"),
+    path('phone_number_verification/', UserPhoneNumberVerificationView.as_view(), name="phone_number_verification"),
     path('password_settings/', UserPasswordSettingsView.as_view(), name="password_settings"),
     path('password_reset/', UserPasswordResetView.as_view(), name="password_reset"),
     path('profile_settings/', UserProfileSettingsView.as_view(), name="profile_settings"),
@@ -27,6 +30,8 @@ urlpatterns = [
     #path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password-reset-complete/', PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+
+    path('user_information/', UserInformationView.as_view(), name="user_information"),
     
     path('api/', include("users.api.urls")),
 ]

@@ -110,7 +110,7 @@ class CariHesapHareketleriList(EditorModelMixin, ModelViewSet, QueryListAPIView)
             conn = pyodbc.connect(connectionString)
             
             SQL_QUERY = """
-            SELECT TOP (1000) cha_create_date,cha_kod,cha_evrak_tip,cha_belge_no,cha_d_cins,cha_meblag,cha_aratoplam,cha_ft_iskonto1,cha_ft_iskonto2,cha_ft_iskonto3,
+            SELECT TOP (1000) cha_create_date,cha_belge_tarih,cha_kod,cha_evrak_tip,cha_belge_no,cha_d_cins,cha_meblag,cha_aratoplam,cha_ft_iskonto1,cha_ft_iskonto2,cha_ft_iskonto3,
             cha_ft_iskonto4,cha_ft_iskonto5,cha_ft_iskonto6,cha_vergi1,cha_vergi2,cha_vergi3,cha_vergi4,cha_vergi5,cha_vergi6,cha_vergi7,cha_vergi8,
             cha_vergi9,cha_vergi10,cha_d_kur,cha_projekodu,cha_aciklama
             FROM CARI_HESAP_HAREKETLERI
@@ -202,6 +202,7 @@ class CariHesapHareketleriList(EditorModelMixin, ModelViewSet, QueryListAPIView)
                 external_data.append({
                     "id" : id,
                     "tarih" : r.cha_create_date.strftime("%d.%m.%Y %H:%M:%S"),
+                    "belgeTarih" : r.cha_belge_tarih.strftime("%d.%m.%Y %H:%M:%S"),
                     "kod" : r.cha_kod,
                     "cari" : cariDict.get(str(r.cha_kod)),
                     "evrakTip" : evrakTipDict.get(str(r.cha_evrak_tip)),

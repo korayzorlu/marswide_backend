@@ -4,6 +4,7 @@ from django.views import View
 from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.utils.crypto import get_random_string
 
 from .models import *
 
@@ -119,5 +120,148 @@ class DeleteCompanyView(LoginRequiredMixin,View):
             new_active_user_company.is_active = True
             new_active_user_company.save()
 
+        
+
+        return JsonResponse({'success': True}, status=200)
+
+class UpdateUserCompanyView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        id = data.get('id')
+        user_email = data.get('userEmail')
+        status = data.get('status')
+        
+        user_companies = UserCompany.objects.filter(user__email = user_email).order_by("company__name")
+        user_company = user_companies.filter(id = int(id)).first()
+
+        if not user_company:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+
+        company = Company.objects.filter(id = user_company.company.id).first()
+        self_user_company = UserCompany.objects.filter(company = company, user = self.request.user).first()
+
+        if not self_user_company.is_admin:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+        
+        if user_company == self_user_company or company.user == user_company.user:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+        
+        print(status)
+
+        if status == "manager":
+            user_company.is_admin = True
+            user_company.save()
+        elif status == "staff":
+            user_company.is_admin = False
+            user_company.save()
+
+        return JsonResponse({'success': True}, status=200)
+
+class DeleteUserCompanyView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        id = data.get('id')
+        user_email = data.get('userEmail')
+        
+        user_companies = UserCompany.objects.filter(user__email = user_email).order_by("company__name")
+        user_company = user_companies.filter(id = int(id)).first()
+
+        if not user_company:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+
+        company = Company.objects.filter(id = user_company.company.id).first()
+        self_user_company = UserCompany.objects.filter(company = company, user = self.request.user).first()
+
+        if not self_user_company.is_admin:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+        
+        if user_company == self_user_company or company.user == user_company.user:
+            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+        
+        user_companies.update(is_active = False)
+
+        user_company.delete()
+
+        new_active_user_company = user_companies.first()
+        if new_active_user_company:
+            new_active_user_company.is_active = True
+            new_active_user_company.save()
+
+        return JsonResponse({'success': True}, status=200)
+
+class AddInvitationView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        recipient_email = data.get('email')
+        company_id = data.get('companyId')
+        
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+        
+        recipient = User.objects.filter(email = recipient_email).first()
+
+        if not recipient:
+            return JsonResponse({'message': 'Failed! User not found'}, status=400)
+
+        company = Company.objects.filter(id = int(company_id)).first()
+
+        user_company = UserCompany.objects.filter(user = recipient, company = company).first()
+
+        if user_company:
+            return JsonResponse({'message': 'This user is already in company.'}, status=400)
+
+        old_invitations = Invitation.objects.filter(recipient = recipient, company = company)
+        for old_invitation in old_invitations:
+            old_invitation.delete()
+
+        invitation = Invitation.objects.create(
+            sender = request.user,
+            recipient = recipient,
+            company = company,
+            token = get_random_string(32)
+        )
+
+        invitation.save()
+
         return JsonResponse({'success': True}, status=200)
     
+class ConfirmInvitationView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        id = data.get('id')
+        status = data.get('status')
+        
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+        
+        invitation = Invitation.objects.filter(id = id, recipient = request.user).first()
+
+        if not invitation:
+            return JsonResponse({'message': 'Sorry, something went wrong!'}, status=400)
+
+        company = Company.objects.filter(id = invitation.company.id).first()
+
+        if not company:
+            return JsonResponse({'message': 'Sorry, something went wrong!'}, status=400)
+
+        if status == "accepted":
+            invitation.status = "accepted"
+            invitation.save()
+
+            user_companies = request.user.user_companies.all()
+            if user_companies:
+                user_companies.update(is_active = False)
+
+            user_company = UserCompany.objects.create(
+                user = request.user,
+                company = company,
+                is_active = True,
+            )
+            user_company.save()
+
+            return JsonResponse({'success': True, 'message':'Accepted invitation!'}, status=200)
+        elif status == "declined":
+            invitation.status = "declined"
+            invitation.save()
+
+            return JsonResponse({'success': True, 'message':'Declined invitation!'}, status=200)

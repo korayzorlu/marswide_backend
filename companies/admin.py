@@ -37,3 +37,23 @@ class UserCompanyAdmin(admin.ModelAdmin):
     class Meta:
         model = UserCompany
 
+@admin.register(Invitation)
+class InvitationAdmin(admin.ModelAdmin):
+    list_display = ["token","sender","recipient", "company", "status"]
+    list_display_links = ["token"]
+    search_fields = ["sender__email","recipient__email","company__name","status"]
+    list_filter = []
+    inlines = []
+    ordering = ["-id"]
+    
+    def sender(self,obj):
+        return obj.sender.email if obj.sender else ""
+    
+    def recipient(self,obj):
+        return obj.recipient.email if obj.recipient else ""
+    
+    def company(self,obj):
+        return obj.company.name if obj.company else ""
+    
+    class Meta:
+        model = Invitation

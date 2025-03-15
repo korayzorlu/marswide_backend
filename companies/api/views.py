@@ -118,9 +118,73 @@ class UserCompanyList(ModelViewSet, QueryListAPIView):
 
         queryset = UserCompany.objects.select_related(*custom_related_fields).filter(user = self.request.user).order_by("company__name")
 
+        if not queryset.filter(is_active=True).exists() and queryset.exists():
+            first_obj = queryset.first()
+            first_obj.is_active = True
+            first_obj.save()
+
         query = self.request.query_params.get('search[value]', None)
         if query:
             search_fields = ["company__name","user__email"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+
+class UsersInCompanyList(ModelViewSet, QueryListAPIView):
+    serializer_class = UsersInCompanyListSerializer
+    filterset_fields = {
+                        'company': ['exact','in', 'isnull'],
+    }
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        companyId = self.request.query_params.get('companyId')
+
+        custom_related_fields = ["user","company"]
+
+        queryset = UserCompany.objects.select_related(*custom_related_fields).filter(company__id = int(companyId)).order_by("company__name")
+
+        if not queryset.filter(is_active=True).exists() and queryset.exists():
+            first_obj = queryset.first()
+            first_obj.is_active = True
+            first_obj.save()
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["company__name","user__email"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+    
+class InvitationList(ModelViewSet, QueryListAPIView):
+    serializer_class = InvitationListSerializer
+    filterset_fields = {
+                        'sender': ['exact','in', 'isnull'],
+    }
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        custom_related_fields = ["sender","recipient","company"]
+
+        queryset = Invitation.objects.select_related(*custom_related_fields).filter(recipient = self.request.user).order_by("id")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["status","sender__email","recipient__email","company__name"]
             
             q_objects = Q()
             for field in search_fields:

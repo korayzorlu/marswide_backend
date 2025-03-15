@@ -10,9 +10,13 @@ class UserListSerializer(serializers.Serializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     email = serializers.CharField()
+    is_email_verified = serializers.BooleanField()
+    phone_country = serializers.SerializerMethodField()
+    phone_number = serializers.CharField()
     name = serializers.SerializerMethodField()
     profile = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    image2 = serializers.SerializerMethodField()
     subscription = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
     userSourceCompanies = serializers.SerializerMethodField()
@@ -26,12 +30,21 @@ class UserListSerializer(serializers.Serializer):
     def get_subscription(self, obj):
         return obj.subscription.get_type_display() if obj.subscription else ''
     
+    def get_phone_country(self, obj):
+        return obj.phone_country.iso2 if obj.phone_country else ''
+    
     def get_image(self, obj):
         if obj.profile and obj.profile.image and obj.profile.image.name:
             request = self.context.get('request')
             image_url = obj.profile.image.url
             if request is not None:
                 return request.build_absolute_uri(image_url)
+            return image_url
+        return ''
+    
+    def get_image2(self, obj):
+        if obj.profile and obj.profile.image and obj.profile.image.name:
+            image_url = obj.profile.image.url
             return image_url
         return ''
     

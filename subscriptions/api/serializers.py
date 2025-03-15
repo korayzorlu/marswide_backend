@@ -11,7 +11,8 @@ class MenuItemListSerializer(serializers.Serializer):
         menu_items = [
             {"type" : "item", "class" : "free", "label" : "Dashboard", "icon" : "dashboard", "route" : "/"},
             {"type" : "sub_menu", "class" : "free", "label" : "Organizations", "icon" : "organization", "items" : [
-                {"type" : "item", "class" : "free", "label" : "Companies", "icon" : "badge", "route" : "/companies"}
+                {"type" : "item", "class" : "free", "label" : "Companies", "icon" : "badge", "route" : "/companies"},
+                {"type" : "item", "class" : "free", "label" : "Invitations", "icon" : "mail", "route" : "/invitations"}
             ]},
             {"type" : "item", "class" : "free", "label" : "Partners", "icon" : "handshake", "route" : "/partners"},
             {"type" : "sub_menu", "class" : "standart", "label" : "Data", "icon" : "database", "items" : [
