@@ -5,8 +5,8 @@ LOGFILE="/var/log/letsencrypt/renew.log"
 
 # Certbot yenileme komutunu çalıştır
 docker run --rm \
-  -v "$(pwd)/nginx/certbot-www:/var/www/certbot" \
-  -v "$(pwd)/nginx/certificates:/etc/letsencrypt" \
+  -v "/home/admin/marswide/marswide_backend/nginx/certbot-www:/var/www/certbot" \
+  -v "/home/admin/marswide/marswide_backend/nginx/certificates:/etc/letsencrypt" \
   certbot/certbot renew --webroot --webroot-path=/var/www/certbot > "$LOGFILE" 2>&1
 
 # Log dosyasını kontrol et
