@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Log dosyasını tanımla
-LOGFILE="/var/log/letsencrypt/renew.log"
+LOGFILE="/home/admin/marswide/marswide_backend/nginx/certificates/renew.log"
 
 # Certbot yenileme komutunu çalıştır
 docker run --rm \
