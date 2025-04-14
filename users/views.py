@@ -87,9 +87,10 @@ class UserLoginView(View):
                 'profile':user.profile.pk,
                 'image': request.build_absolute_uri(user.profile.image.url) if user.profile.image else "",
                 'theme': user.profile.theme,
-                'userSourceCompanies': []
+                'userSourceCompanies': [],
+                'subscription' : user.subscription.get_type_display() if user.subscription else ''
             }
-            return JsonResponse({'success': True, 'user':user_data, 'theme': user.profile.theme}, status=200)
+            return JsonResponse({'user':user_data, 'theme': user.profile.theme}, status=200)
         else:
             return JsonResponse({'message': 'Login failed! Invalid username or password.'}, status=401)
 
@@ -138,6 +139,28 @@ class UserRegisterView(View):
 
         user = authenticate(request, email=email, password=password)
         login(request, user)
+
+        token = signer.sign(user.email)
+        verification_url = f"{os.getenv("EMAIL_PROTOCOL")}://{request.get_host()}/api/users/email_verification?token={token}"
+
+        try:
+            subject = "Verify Your Email for Marswide"
+            message = f"Please verify your email by clicking the link below.\n\n{verification_url}"
+            from_email = "Marswide <info@marswide.com>"
+            to_email = [email]
+            
+            email_message = EmailMessage(
+                subject,
+                message,
+                from_email, 
+                to_email
+            )
+
+            email_message.body = message
+            email_message.send()
+        except:
+            pass
+        
         user_data = {
                 'id': user.id,
                 'email': user.email,
@@ -146,9 +169,10 @@ class UserRegisterView(View):
                 'name' : user.first_name + " " + user.last_name if user else '',
                 'profile':user.profile.pk,
                 'theme': user.profile.theme,
-                'userSourceCompanies': []
+                'userSourceCompanies': [],
+                'subscription' : user.subscription.get_type_display() if user.subscription else ''
             }
-        return JsonResponse({'success': True, 'user':user_data}, status=201)
+        return JsonResponse({'user':user_data}, status=201)
     
 class UserEmailSettingsView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -179,7 +203,7 @@ class UserEmailSettingsView(LoginRequiredMixin,View):
 
             email_message.body = message
             email_message.send()
-            return JsonResponse({'success': True}, status=200)
+            return JsonResponse({'message': 'Sent successfully!'}, status=200)
         except User.DoesNotExist:
                 return JsonResponse({'message': 'User not found. Please enter a valid email address.'}, status=400)
         except BadHeaderError:
@@ -194,7 +218,7 @@ class UserEmailVerificationView(View):
             user = User.objects.get(email=email)
             user.is_email_verified = True
             user.save()
-            return JsonResponse({'message': 'Successfully verified!'}, status=200)
+            return JsonResponse({'message': 'Verified successfully!'}, status=200)
         except SignatureExpired:
                 return JsonResponse({'message': 'Link expired!'}, status=400)
         except (BadSignature, User.DoesNotExist):
@@ -225,7 +249,7 @@ class UserPhoneNumberSettingsView(LoginRequiredMixin,View):
 
         verification_check = client.verify.v2.services(request.user.verify_sid).verifications.create(to=f"{country.dial_code}{phone_number}", channel='sms')
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Saved successfully!'}, status=200)
     
 class UserPhoneNumberVerificationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -258,7 +282,7 @@ class UserPhoneNumberVerificationView(LoginRequiredMixin,View):
         else:
             return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Verified successfully!'}, status=200)
 
 class UserPasswordSettingsView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -290,7 +314,7 @@ class UserPasswordSettingsView(LoginRequiredMixin,View):
         else:
             return JsonResponse({'message': 'Auth failed! Invalid password.'}, status=400)
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Saved successfully!'}, status=200)
     
 class UserPasswordResetView(View):
     def post(self, request, *args, **kwargs):
@@ -362,7 +386,7 @@ class UserProfileSettingsView(LoginRequiredMixin,View):
 
         profile.save()
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Saved successfully!'}, status=200)
     
 class UserInformationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -383,4 +407,4 @@ class UserInformationView(LoginRequiredMixin,View):
                 'image': request.build_absolute_uri(user.profile.image.url) if user.profile.image else "",
         }
 
-        return JsonResponse({'success': True, 'user':user_data}, status=200)
+        return JsonResponse({'user':user_data}, status=200)

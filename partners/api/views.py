@@ -80,6 +80,7 @@ class QueryListAPIView(generics.ListAPIView):
 class PartnerList(ModelViewSet, QueryListAPIView):
     serializer_class = PartnerListSerializer
     filterset_fields = {
+                        'uuid': ['exact','in', 'isnull'],
                         'company': ['exact','in', 'isnull'],
     }
     filter_backends = [OrderingFilter,DjangoFilterBackend]

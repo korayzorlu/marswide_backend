@@ -5,7 +5,12 @@ from .views import *
 app_name = "partners"
 
 urlpatterns = [
-
+    path('add_partner/', AddPartnerView.as_view(), name="add_partner"),
+    path('update_partner/', UpdatePartnerView.as_view(), name="update_partner"),
+    path('delete_partner/', DeletePartnerView.as_view(), name="delete_partner"),
+    path('delete_partners/', DeletePartnersView.as_view(), name="delete_partners"),
+    path('partners_template/', PartnersTemplateView.as_view(), name="partners_template"),
+    path('import_partners/', ImportPartnersView.as_view(), name="import_partners"),
     
     path('', include("partners.api.urls")),
 ]

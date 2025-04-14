@@ -18,4 +18,4 @@ class ReadNotificationView(LoginRequiredMixin,View):
         if notifications:
             notifications.update(is_read = True)
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Created successfully!'}, status=200)

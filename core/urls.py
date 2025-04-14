@@ -29,6 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin/clearcache/', include('clearcache.urls')),
 
+    path('api/common/', include("common.urls")),
     path('api/companies/', include("companies.urls")),
     path('api/data/', include("data.urls")),
     path('api/mikro/', include("mikro.urls")),

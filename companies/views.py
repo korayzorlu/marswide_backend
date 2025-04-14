@@ -56,7 +56,7 @@ class AddCompanyView(LoginRequiredMixin,View):
 
         user_company.save()
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Created successfully!'}, status=200)
     
 class UpdateCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -96,7 +96,7 @@ class UpdateCompanyView(LoginRequiredMixin,View):
 
         company.save()
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Saved successfully!'}, status=200)
     
 class DeleteCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -122,7 +122,7 @@ class DeleteCompanyView(LoginRequiredMixin,View):
 
         
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Removed successfully!'}, status=200)
 
 class UpdateUserCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -155,7 +155,7 @@ class UpdateUserCompanyView(LoginRequiredMixin,View):
             user_company.is_admin = False
             user_company.save()
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Changed successfully!'}, status=200)
 
 class DeleteUserCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -187,7 +187,7 @@ class DeleteUserCompanyView(LoginRequiredMixin,View):
             new_active_user_company.is_active = True
             new_active_user_company.save()
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Removed successfully!'}, status=200)
 
 class AddInvitationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -223,7 +223,7 @@ class AddInvitationView(LoginRequiredMixin,View):
 
         invitation.save()
 
-        return JsonResponse({'success': True}, status=200)
+        return JsonResponse({'message': 'Sent successfully!'}, status=200)
     
 class ConfirmInvitationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -259,9 +259,9 @@ class ConfirmInvitationView(LoginRequiredMixin,View):
             )
             user_company.save()
 
-            return JsonResponse({'success': True, 'message':'Accepted invitation!'}, status=200)
+            return JsonResponse({'message':'Accepted invitation!'}, status=200)
         elif status == "declined":
             invitation.status = "declined"
             invitation.save()
 
-            return JsonResponse({'success': True, 'message':'Declined invitation!'}, status=200)
+            return JsonResponse({'message':'Declined invitation!'}, status=200)

@@ -5,14 +5,32 @@ from partners.models import *
 from companies.models import Company,UserCompany
 
 class PartnerListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    uuid = serializers.CharField()
     image = serializers.ImageField()
     name = serializers.CharField()
     formalName = serializers.CharField(source = "formal_name")
-    company = serializers.SerializerMethodField()
+    types = serializers.ListField()
+    companyId = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
+    country_name = serializers.SerializerMethodField()
+    city_name = serializers.SerializerMethodField()
+    address = serializers.CharField()
     
-    def get_company(self, obj):
-        return obj.company.name if obj.company else ''
+    def get_country(self, obj):
+        return obj.country.iso2 if obj.country else ''
+    
+    def get_city(self, obj):
+        return obj.city.id if obj.city else ''
+    
+    def get_country_name(self, obj):
+        return obj.country.name if obj.country else ''
+    
+    def get_city_name(self, obj):
+        return obj.city.name if obj.city else ''
+    
+    def get_companyId(self, obj):
+        return obj.company.id if obj.company else ''
 
     def update(self, instance, validated_data):
         info = model_meta.get_field_info(instance)

@@ -18,3 +18,13 @@ class Country(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+    
+class City(models.Model):
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="country_cities")
+    name = models.CharField(_("City"), max_length=150, null=True, blank=True)
+
+    created_date = models.DateTimeField(auto_now_add=True, null=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return str(self.name)

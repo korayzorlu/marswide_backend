@@ -15,3 +15,18 @@ class CountryAdmin(admin.ModelAdmin):
     
     class Meta:
         model = Country
+
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display = ["country","name"]
+    list_display_links = ["name"]
+    search_fields = ["country__name","name"]
+    list_filter = []
+    inlines = []
+    ordering = ["id"]
+
+    def user(self,obj):
+        return obj.country.name if obj.country else ""
+    
+    class Meta:
+        model = City

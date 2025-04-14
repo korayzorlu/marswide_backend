@@ -1,20 +1,43 @@
 from django.contrib import admin
+from django import forms
 
 from .models import Partner
 
 # Register your models here.
 
+class PartnerAdminForm(forms.ModelForm):
+    TYPES_CHOICES = [
+        ('customer', 'Customer'),
+        ('supplier', 'Supplier')
+    ]
+
+    types = forms.MultipleChoiceField(
+        choices=TYPES_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    class Meta:
+        model = Partner
+        fields = '__all__'
+
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
-    list_display = ["company","name", "formal_name"]
+    form = PartnerAdminForm
+    
+    list_display = ["company","name","formal_name","types"]
     list_display_links = ["name"]
     search_fields = ["company__name","name","formal_name"]
     list_filter = []
     inlines = []
-    ordering = ["-id"]
+    ordering = ["name"]
     
     def company(self,obj):
         return obj.company.name if obj.company else ""
+    
+    def display_types(self, obj):
+        return ", ".join(obj.types or [])
+    display_types.short_description = "Types"
     
     class Meta:
         model = Partner

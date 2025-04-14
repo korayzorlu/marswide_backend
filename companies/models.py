@@ -47,7 +47,7 @@ class Invitation(models.Model):
         ('accepted', ('Accepted')),
         ('declined', ('Declined'))
     )
-    status = models.CharField(_("Theme"), max_length=25, default='pending', choices=STATUS_CHOICES, blank=True, null=True)
+    status = models.CharField(_("Status"), max_length=25, default='pending', choices=STATUS_CHOICES, blank=True, null=True)
 
     token = models.CharField(max_length=255, unique=True)
 

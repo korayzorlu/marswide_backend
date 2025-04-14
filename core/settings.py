@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "users",
+    "common",
     "subscriptions",
     "companies",
     "mikro",
@@ -79,6 +80,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'common.middleware.ThreadLocalMiddleware',
+    'core.middleware.CurrentUserMiddleware',
+    'core.middleware.CurrentRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -106,6 +110,8 @@ CHANNEL_LAYERS= {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("redis", 6379)],
+            "capacity": 5000,
+            "group_expiry": 60 * 5
         },
     },
 }
@@ -258,8 +264,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',  # giriş yapmış kullanıcılar için limit
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/second',  # anonim kullanıcılar için limit
-        'user': '5/second',  # kullanıcı başına günlük limit
+        'anon': '10/second',  # anonim kullanıcılar için limit
+        'user': '10/second',  # kullanıcı başına günlük limit
     }
 }
 
@@ -327,7 +333,16 @@ LOGGING = {
         "file": {
             "level": "INFO",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "debug.log"),
+            "filename": os.path.join(BASE_DIR, "logs/core/debug.log"),
+            "formatter": "verbose",
+            "when" : "midnight",
+            "interval" : 1,
+            "backupCount" : 7,
+        },
+        "celery_file": {
+            "level": "INFO",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/celery/celery.log"),
             "formatter": "verbose",
             "when" : "midnight",
             "interval" : 1,
@@ -342,6 +357,11 @@ LOGGING = {
         },
         'channels': {
             'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery': {
+            'handlers': ['celery_file'],
             'level': 'INFO',
             'propagate': True,
         },

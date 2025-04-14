@@ -9,16 +9,12 @@ class MenuItemListSerializer(serializers.Serializer):
     
     def get_menu_items(self, obj):
         menu_items = [
-            {"type" : "item", "class" : "free", "label" : "Dashboard", "icon" : "dashboard", "route" : "/"},
+            {"type" : "item", "class" : "free", "label" : "Dashboard", "icon" : "dashboard", "route" : "/dashboard"},
             {"type" : "sub_menu", "class" : "free", "label" : "Organizations", "icon" : "organization", "items" : [
                 {"type" : "item", "class" : "free", "label" : "Companies", "icon" : "badge", "route" : "/companies"},
                 {"type" : "item", "class" : "free", "label" : "Invitations", "icon" : "mail", "route" : "/invitations"}
             ]},
             {"type" : "item", "class" : "free", "label" : "Partners", "icon" : "handshake", "route" : "/partners"},
-            {"type" : "sub_menu", "class" : "standart", "label" : "Data", "icon" : "database", "items" : [
-                {"type" : "item", "class" : "standart", "label" : "Makers", "icon" : "home", "route" : "/makers"},
-                {"type" : "item", "class" : "enterprise", "label" : "Parts", "icon" : "home", "route" : "/parts"}
-            ]},
             {"type" : "sub_menu", "class" : "free", "label" : "Mikro", "icon" : "database", "items" : [
                 {"type" : "item", "class" : "free", "label" : "Cari Hesap Hareketleri", "icon" : "home", "route" : "/cari-hesap-hareketleri"},
                 {"type" : "item", "class" : "free", "label" : "Personeller", "icon" : "home", "route" : "/personeller"},

@@ -3,7 +3,7 @@ from rest_framework.utils import html, model_meta, representation
 from datetime import datetime, timezone
 
 from companies.models import *
-from data.models import Country
+from data.models import Country,City
 
 class CountryListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -14,5 +14,11 @@ class CountryListSerializer(serializers.Serializer):
     dialCode = serializers.CharField(source = "dial_code")
     emoji = serializers.CharField()
     flag = serializers.CharField()
+
+class CityListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    country = serializers.SerializerMethodField()
+    name = serializers.CharField()
     
-    
+    def get_country(self, obj):
+        return obj.country.name if obj.country else ''
