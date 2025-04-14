@@ -64,6 +64,16 @@ services:
     networks:
       - marswide_network
 
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./nginx/certificates:/etc/letsencrypt
+      - ./nginx/certbot-www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'echo ready'"
+    networks:
+      - marswide_network
+
   celery:
     build:
       context: .
