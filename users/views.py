@@ -35,7 +35,7 @@ from twilio.rest import Client
 from .models import *
 from .utils import get_client_ip,get_client_country
 from subscriptions.models import Subscription
-from data.models import Country
+from data.models import Country,Currency
 
 # Create your views here.
 
@@ -80,6 +80,8 @@ class UserLoginView(View):
 
             ip = get_client_ip(request)
             country = get_client_country(ip)
+            currency = Currency.objects.filter(countries__iso2=country).first()
+            curr = currency.code if currency else ""
 
             user_data = {
                 'id': user.id,
@@ -94,7 +96,7 @@ class UserLoginView(View):
                 'theme': user.profile.theme,
                 'userSourceCompanies': [],
                 'subscription' : user.subscription.get_type_display() if user.subscription else '',
-                'country' : country
+                'location' : {"country":country,"currency":curr}
             }
             return JsonResponse({'user':user_data, 'theme': user.profile.theme}, status=200)
         else:

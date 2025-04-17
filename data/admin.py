@@ -33,12 +33,17 @@ class CityAdmin(admin.ModelAdmin):
 
 @admin.register(Currency)
 class CurrencyAdmin(admin.ModelAdmin):
-    list_display = ["code","name","symbol","exchange_rate"]
+    list_display = ["countries_display","code","name","symbol","exchange_rate"]
     list_display_links = ["code"]
     search_fields = ["code","name","symbol","exchange_rate"]
     list_filter = []
     inlines = []
     ordering = ["id"]
+
+    def countries_display(self, obj):
+        countries = obj.countries.all()
+        return ", ".join([country.name for country in countries]) if countries else "-"
+    countries_display.short_description = "Countries"
     
     class Meta:
         model = Currency

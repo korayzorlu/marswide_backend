@@ -30,6 +30,7 @@ class City(models.Model):
         return str(self.name)
 
 class Currency(models.Model):
+    countries = models.ManyToManyField(Country,related_name='country_currencies', blank = True)
     code = models.CharField(_("Code"), max_length=25, null=True, blank=True)
     name = models.CharField(_("Name"), max_length=50, null=True, blank=True)
     symbol = models.CharField(_("Symbol"), max_length=25, null=True, blank=True)

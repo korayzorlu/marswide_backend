@@ -56,17 +56,23 @@ class Command(BaseCommand):
         
         new_currencies = []
         for index,currency in enumerate(currency_list):
+            currency["countries"] = []
+            for country in countries:
+                if currency["code"] in country.get("currencies",{}):
+                    currency["countries"].append(country["cca2"])
+            print(currency)
             new_currencies.append({
                 "model" : "data.currency",
                 "pk" : index + 1,
                 "fields" : {
+                    "countries" : [c.pk for c in Country.objects.filter(iso2__in=currency["countries"])],
                     "code" : currency["code"],
                     "name" : currency["name"],
                     "symbol" : currency["symbol"],
                     "exchange_rate" : 0
                 }
             })
-
+        
         with open(os.path.join(settings.BASE_DIR, "data/fixtures/currency-model.json"), "w") as f:
             json.dump(new_currencies, f)
 
