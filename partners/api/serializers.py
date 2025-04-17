@@ -10,18 +10,43 @@ class PartnerListSerializer(serializers.Serializer):
     name = serializers.CharField()
     formalName = serializers.CharField(source = "formal_name")
     types = serializers.ListField()
+    customer = serializers.SerializerMethodField()
+    supplier = serializers.SerializerMethodField()
     companyId = serializers.SerializerMethodField()
+    vatOffice = serializers.CharField(source = "vat_office")
+    vatNo = serializers.CharField(source = "vat_no")
     country = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
+    address = serializers.CharField()
+    address2 = serializers.CharField()
+    isBillingSame = serializers.BooleanField(source = "is_billing_same")
+    billingCountry = serializers.SerializerMethodField()
+    billingCity = serializers.SerializerMethodField()
+    billingAddress = serializers.CharField(source = "billing_address")
+    billingAddress2 = serializers.CharField(source = "billing_address2")
     country_name = serializers.SerializerMethodField()
     city_name = serializers.SerializerMethodField()
-    address = serializers.CharField()
+    phoneCountry = serializers.SerializerMethodField(source = "phone_country")
+    phoneNumber = serializers.CharField(source = "phone_number")
+    email = serializers.EmailField()
+    
+    def get_customer(self, obj):
+        return True if "customer" in obj.types else False
+    
+    def get_supplier(self, obj):
+        return True if "supplier" in obj.types else False
     
     def get_country(self, obj):
         return obj.country.iso2 if obj.country else ''
     
     def get_city(self, obj):
-        return obj.city.id if obj.city else ''
+        return {"id":obj.city.id,"name":obj.city.name} if obj.city else {}
+    
+    def get_billingCountry(self, obj):
+        return obj.billing_country.iso2 if obj.billing_country else ''
+    
+    def get_billingCity(self, obj):
+        return {"id":obj.billing_city.id,"name":obj.billing_city.name} if obj.billing_city else {}
     
     def get_country_name(self, obj):
         return obj.country.name if obj.country else ''
@@ -31,6 +56,9 @@ class PartnerListSerializer(serializers.Serializer):
     
     def get_companyId(self, obj):
         return obj.company.id if obj.company else ''
+    
+    def get_phoneCountry(self, obj):
+        return obj.phone_country.iso2 if obj.phone_country else ''
 
     def update(self, instance, validated_data):
         info = model_meta.get_field_info(instance)

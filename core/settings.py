@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "partners",
     "notifications",
     "data",
+    "geoip2",
 ]
 
 MIDDLEWARE = [
@@ -430,3 +431,7 @@ DEFAULT_FROM_EMAIL = 'Marswide <info@marswide.com>'
 
 BACKEND_URL = str(os.getenv('BACKEND_URL'))
 FRONTEND_URL = str(os.getenv('FRONTEND_URL'))
+
+# GeoIP
+
+GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')

@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from rest_framework.utils import html, model_meta, representation
+from django.contrib.gis.geoip2 import GeoIP2
 
 from users.models import *
+from users.utils import get_client_ip,get_client_country
 from subscriptions.models import Subscription
 
 class UserListSerializer(serializers.Serializer):
@@ -20,6 +22,7 @@ class UserListSerializer(serializers.Serializer):
     subscription = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
     userSourceCompanies = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
     
     def get_name(self, obj):
         return obj.first_name + " " + obj.last_name if obj else ''
@@ -53,6 +56,10 @@ class UserListSerializer(serializers.Serializer):
     
     def get_userSourceCompanies(self, obj):
         return []
+    
+    def get_country(self, obj):
+        ip = get_client_ip(self.context.get("request"))
+        return get_client_country(ip)
     
     def update(self, instance, validated_data):
         info = model_meta.get_field_info(instance)

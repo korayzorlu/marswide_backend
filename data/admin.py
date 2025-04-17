@@ -30,3 +30,15 @@ class CityAdmin(admin.ModelAdmin):
     
     class Meta:
         model = City
+
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    list_display = ["code","name","symbol","exchange_rate"]
+    list_display_links = ["code"]
+    search_fields = ["code","name","symbol","exchange_rate"]
+    list_filter = []
+    inlines = []
+    ordering = ["id"]
+    
+    class Meta:
+        model = Currency

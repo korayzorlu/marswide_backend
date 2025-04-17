@@ -23,10 +23,22 @@ class Partner(models.Model):
         ('supplier', ('Supplier')),
     )
     types = ArrayField(models.CharField(_("Status"), max_length=25, choices=TYPES_CHOICES), default=list, blank=True, null=True)
+    vat_office = models.CharField(_("Vat Office"), max_length=50, blank=True, null=True)
+    vat_no = models.CharField(_("Vat No"), max_length=50, blank=True, null=True)
 
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="country_partners")
     city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True, related_name="city_partners")
     address = models.CharField(_("Address"), max_length=150, blank=True, null=True)
+    address2 = models.CharField(_("Address 2"), max_length=150, blank=True, null=True)
+    is_billing_same = models.BooleanField(default=False)
+    billing_country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="billing_country_partners")
+    billing_city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True, related_name="billing_city_partners")
+    billing_address = models.CharField(_("Billing Address"), max_length=150, blank=True, null=True)
+    billing_address2 = models.CharField(_("Billing Address 2"), max_length=150, blank=True, null=True)
+
+    phone_country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="phone_country_partners")
+    phone_number = models.CharField(_("Phone Number"), max_length=25, blank=True, null=True)
+    email = models.EmailField(_("Email"), max_length=100, blank=True, null=True)
     
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)

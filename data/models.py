@@ -28,3 +28,15 @@ class City(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+class Currency(models.Model):
+    code = models.CharField(_("Code"), max_length=25, null=True, blank=True)
+    name = models.CharField(_("Name"), max_length=50, null=True, blank=True)
+    symbol = models.CharField(_("Symbol"), max_length=25, null=True, blank=True)
+    exchange_rate = models.DecimalField(_("Exchange Rate"), default = 0.00, max_digits=10, decimal_places=4)
+
+    created_date = models.DateTimeField(auto_now_add=True, null=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return str(self.code)

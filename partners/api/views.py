@@ -11,6 +11,8 @@ from rest_framework_datatables_editor.viewsets import DatatablesEditorModelViewS
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 
 from core.permissions import SubscriptionPermission,BlockBrowserAccessPermission,RequireCustomHeaderPermission
 
@@ -77,6 +79,24 @@ class QueryListAPIView(generics.ListAPIView):
                 self._paginator = None
         return self._paginator
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 50
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class DatatablesPagination(LimitOffsetPagination):
+    default_limit = 50
+    limit_query_param = 'length'
+    offset_query_param = 'start'
+
+    def get_paginated_response(self, data):
+        return Response({
+            'draw': int(self.request.query_params.get('draw', 0)),
+            'recordsTotal': self.count,
+            'recordsFiltered': self.count,
+            'data': data
+        })
+    
 class PartnerList(ModelViewSet, QueryListAPIView):
     serializer_class = PartnerListSerializer
     filterset_fields = {
@@ -85,6 +105,7 @@ class PartnerList(ModelViewSet, QueryListAPIView):
     }
     filter_backends = [OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'
+    pagination_class = DatatablesPagination
     required_subscription = "free"
     permission_classes = [SubscriptionPermission]
     
@@ -98,7 +119,7 @@ class PartnerList(ModelViewSet, QueryListAPIView):
 
         query = self.request.query_params.get('search[value]', None)
         if query:
-            search_fields = ["name","formalName","company__name"]
+            search_fields = ["name","formal_name","company__name"]
             
             q_objects = Q()
             for field in search_fields:

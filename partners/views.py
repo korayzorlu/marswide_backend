@@ -12,9 +12,10 @@ from asgiref.sync import async_to_sync
 from utils.mixins import CompanyOwnershipRequiredMixin
 
 from .models import *
+from .tasks import importPartners
+from .utils import is_valid_partner_data, get_partner_types
 from common.models import ImportProcess
 from common.utils import BaseImporter
-from .tasks import importPartners
 
 import os
 import json
@@ -39,25 +40,42 @@ class AddPartnerView(LoginRequiredMixin,View):
         if not request.user.is_authenticated:
             return JsonResponse({'message': 'Auth failed!.'}, status=401)
         
-        if not data.get('name') or not data.get('formalName'):
-            return JsonResponse({'message': 'Fill required fields.'}, status=400)
+        valid, response = is_valid_partner_data(data)
+        if not valid:
+            return response
         
         company = Company.objects.filter(id = data.get('companyId')).first()
         active_company = request.user.user_companies.filter(is_active = True, company = company).first()
 
         if not company or not active_company:
             return JsonResponse({'message': 'Sorry, something went wrong!'}, status=400)
-
+        
         country = Country.objects.filter(iso2 = data.get('country')).first()
-        city = City.objects.filter(country__iso2 = data.get('country'),id = data.get('city')).first()
+        city = City.objects.filter(country__iso2 = data.get('country'),id = data.get('city').get("id")).first()
+        billing_country = Country.objects.filter(iso2 = data.get('billingCountry')).first()
+        billing_city = City.objects.filter(country__iso2 = data.get('billingCountry'),id = data.get('billingCity').get("id")).first()
+
+        phone_country = Country.objects.filter(iso2 = data.get('phoneCountry') if data.get('phoneCountry') else 0).first()
 
         partner = Partner.objects.create(
+            types = get_partner_types(data),
             company = company,
             name = data.get('name'),
             formal_name = data.get('formalName'),
+            vat_office = data.get('vatOffice'),
+            vat_no = data.get('vatNo'),
             country = country,
             city = city,
-            address = data.get('address')
+            address = data.get('address'),
+            address2 = data.get('address2'),
+            is_billing_same = data.get('isBillingSame'),
+            billing_country = country if data.get('isBillingSame') else billing_country,
+            billing_city = city if data.get('isBillingSame') else billing_city,
+            billing_address = data.get('address') if data.get('isBillingSame') else data.get('billingAddress'),
+            billing_address2 = data.get('address2') if data.get('isBillingSame') else data.get('billingAddress2'),
+            phone_country = phone_country if data.get('phoneNumber') else None,
+            phone_number = data.get('phoneNumber') if phone_country else None,
+            email = data.get('email')
         )
         partner.save()
 
@@ -69,19 +87,35 @@ class UpdatePartnerView(LoginRequiredMixin,CompanyOwnershipRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
 
-        if not data.get('name') or not data.get('formalName'):
-            return JsonResponse({'message': 'Fill required fields.'}, status=400)
+        valid, response = is_valid_partner_data(data)
+        if not valid:
+            return response
 
         country = Country.objects.filter(iso2 = data.get('country') if data.get('country') else 0).first()
-        city = City.objects.filter(country__iso2 = data.get('country') if data.get('country') else 0,id = int(data.get('city')) if data.get('city') else 0).first()
+        city = City.objects.filter(country__iso2 = data.get('country') if data.get('country') else 0,id = int(data.get('city').get("id")) if data.get('city').get("id") else 0).first()
+        billing_country = Country.objects.filter(iso2 = data.get('billingCountry') if data.get('billingCountry') else 0).first()
+        billing_city = City.objects.filter(country__iso2 = data.get('billingCountry') if data.get('billingCountry') else 0,id = int(data.get('billingCity').get("id")) if data.get('billingCity').get("id") else 0).first()
+
+        phone_country = Country.objects.filter(iso2 = data.get('phoneCountry') if data.get('phoneCountry') else 0).first()
 
         partner = Partner.objects.filter(uuid = data.get('uuid')).first()
-        
+        partner.types = get_partner_types(data)
         partner.name = data.get('name')
         partner.formal_name = data.get('formalName')
+        partner.vat_office = data.get('vatOffice')
+        partner.vat_no = data.get('vatNo')
         partner.country = country if country else None
         partner.city = city if city else None
         partner.address = data.get('address')
+        partner.address2 = data.get('address2')
+        partner.is_billing_same = data.get('isBillingSame')
+        partner.billing_country = country if data.get('isBillingSame') else billing_country
+        partner.billing_city = city if data.get('isBillingSame') else billing_city
+        partner.billing_address = data.get('address') if data.get('isBillingSame') else data.get('billingAddress')
+        partner.billing_address2 = data.get('address2') if data.get('isBillingSame') else data.get('billingAddress2')
+        partner.phone_country = phone_country if data.get('phoneNumber') else None
+        partner.phone_number = data.get('phoneNumber') if phone_country else None
+        partner.email = data.get('email')
         partner.save()
 
         return JsonResponse({'message': 'Saved successfully!'}, status=200)
@@ -106,6 +140,16 @@ class DeletePartnersView(LoginRequiredMixin,CompanyOwnershipRequiredMixin,View):
 
         for uuid in uuids:
             partner = Partner.objects.filter(uuid = uuid).first()
+            partner.delete()
+
+        return JsonResponse({'message': 'Removed successfully!'}, status=200)
+    
+class DeleteAllPartnersView(LoginRequiredMixin,CompanyOwnershipRequiredMixin,View):
+    model = Partner
+
+    def post(self, request, *args, **kwargs):
+        partners = Partner.objects.filter()
+        for partner in partners:
             partner.delete()
 
         return JsonResponse({'message': 'Removed successfully!'}, status=200)

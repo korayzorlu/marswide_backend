@@ -3,7 +3,7 @@ from rest_framework.utils import html, model_meta, representation
 from datetime import datetime, timezone
 
 from companies.models import *
-from data.models import Country,City
+from data.models import Country,City,Currency
 
 class CountryListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -22,3 +22,10 @@ class CityListSerializer(serializers.Serializer):
     
     def get_country(self, obj):
         return obj.country.name if obj.country else ''
+    
+class CurrencyListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    code = serializers.CharField()
+    name = serializers.CharField()
+    symbol = serializers.CharField()
+    exchange_rate = serializers.DecimalField(max_digits=10,decimal_places=4)

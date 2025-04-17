@@ -19,6 +19,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.core.signing import TimestampSigner,BadSignature, SignatureExpired
 from django.urls import reverse
+from django.contrib.gis.geoip2 import GeoIP2
 
 import os
 from sendgrid import SendGridAPIClient
@@ -32,6 +33,7 @@ import logging
 from twilio.rest import Client
 
 from .models import *
+from .utils import get_client_ip,get_client_country
 from subscriptions.models import Subscription
 from data.models import Country
 
@@ -76,6 +78,9 @@ class UserLoginView(View):
                 user.verify_sid = service.sid
                 user.save()
 
+            ip = get_client_ip(request)
+            country = get_client_country(ip)
+
             user_data = {
                 'id': user.id,
                 'email': user.email,
@@ -88,7 +93,8 @@ class UserLoginView(View):
                 'image': request.build_absolute_uri(user.profile.image.url) if user.profile.image else "",
                 'theme': user.profile.theme,
                 'userSourceCompanies': [],
-                'subscription' : user.subscription.get_type_display() if user.subscription else ''
+                'subscription' : user.subscription.get_type_display() if user.subscription else '',
+                'country' : country
             }
             return JsonResponse({'user':user_data, 'theme': user.profile.theme}, status=200)
         else:

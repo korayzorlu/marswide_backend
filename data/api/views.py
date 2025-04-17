@@ -145,3 +145,29 @@ class CityList(ModelViewSet, QueryListAPIView):
             
             queryset = queryset.filter(q_objects)
         return queryset
+    
+class CurrencyList(ModelViewSet, QueryListAPIView):
+    serializer_class = CurrencyListSerializer
+    filterset_fields = {
+                        'code': ['exact','in', 'isnull'],
+    }
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        custom_related_fields = []
+
+        queryset = Currency.objects.select_related(*custom_related_fields).filter().order_by("code")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["code","name","symbol"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset

@@ -134,6 +134,7 @@ class BaseImporter():
                 name = row["name"],
                 formal_name = row["formal_name"],
                 address = row.get("address") or None,
+                email = row.get("email") or None,
                 types = type_list
             )
             partner.save()
@@ -141,3 +142,4 @@ class BaseImporter():
         self.process.progress = 100
         self.process.status = "completed"
         self.process.save()
+

@@ -83,3 +83,4 @@ pandas==2.2.3
 twilio==9.4.6
 sendgrid==6.11.0
 openpyxl==3.1.5
+geoip2==5.0.1
