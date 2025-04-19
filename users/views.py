@@ -35,7 +35,7 @@ from twilio.rest import Client
 from .models import *
 from .utils import get_client_ip,get_client_country
 from subscriptions.models import Subscription
-from data.models import Country,Currency
+from common.models import Country,Currency
 
 # Create your views here.
 
@@ -100,7 +100,7 @@ class UserLoginView(View):
             }
             return JsonResponse({'user':user_data, 'theme': user.profile.theme}, status=200)
         else:
-            return JsonResponse({'message': 'Login failed! Invalid username or password.'}, status=401)
+            return JsonResponse({'message': 'Login failed! Invalid username or password.','status':'error'}, status=401)
 
 #@method_decorator(csrf_exempt, name='dispatch')
 class UserLogoutView(LoginRequiredMixin,View):
@@ -120,21 +120,21 @@ class UserRegisterView(View):
         username = email.split('@')[0]
 
         if not email or not password or not passwordConfirmation or not firstName or not lastName or not refCode:
-            return JsonResponse({'message': 'Register failed! Fill required fields.'}, status=400)
+            return JsonResponse({'message': 'Register failed! Fill required fields.','status':'error'}, status=400)
         
         if User.objects.filter(email=email).exists():
-            return JsonResponse({'message': 'Register failed! This email address is already in use.'}, status=400)
+            return JsonResponse({'message': 'Register failed! This email address is already in use.','status':'error'}, status=400)
         
         if password != passwordConfirmation:
-            return JsonResponse({'message': 'Register failed! Please make sure your passwords match.'}, status=400)
+            return JsonResponse({'message': 'Register failed! Please make sure your passwords match.','status':'error'}, status=400)
         
         try:
             validate_password(password)
         except ValidationError as e:
-            return JsonResponse({'message': ' '.join(e.messages)}, status=400)
+            return JsonResponse({'message': ' '.join(e.messages),'status':'error'}, status=400)
         
         if refCode != "MARS2030SDXF":
-            return JsonResponse({'message': 'Register failed! Invalid reference code'}, status=400)
+            return JsonResponse({'message': 'Register failed! Invalid reference code','status':'error'}, status=400)
 
         user = User.objects.create_user(email=email, username=username, first_name=firstName, last_name=lastName, password=password)
         user.save()
@@ -188,10 +188,10 @@ class UserEmailSettingsView(LoginRequiredMixin,View):
         email = data.get('email')
 
         if not request.user.is_authenticated:
-            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+            return JsonResponse({'message': 'Auth failed!.','status':'error'}, status=401)
 
         if User.objects.filter(email=email).exclude(id=request.user.id).exists():
-            return JsonResponse({'message': 'This email address is already in use.'}, status=400)
+            return JsonResponse({'message': 'This email address is already in use.','status':'error'}, status=400)
         
         token = signer.sign(request.user.email)
         verification_url = f"{os.getenv("EMAIL_PROTOCOL")}://{request.get_host()}/api/users/email_verification?token={token}"
@@ -211,11 +211,11 @@ class UserEmailSettingsView(LoginRequiredMixin,View):
 
             email_message.body = message
             email_message.send()
-            return JsonResponse({'message': 'Sent successfully!'}, status=200)
+            return JsonResponse({'message': 'Sent successfully!','status':'success'}, status=200)
         except User.DoesNotExist:
-                return JsonResponse({'message': 'User not found. Please enter a valid email address.'}, status=400)
+                return JsonResponse({'message': 'User not found. Please enter a valid email address.','status':'error'}, status=400)
         except BadHeaderError:
-            return JsonResponse({'message': 'Invalid header.'}, status=400)
+            return JsonResponse({'message': 'Invalid header.','status':'error'}, status=400)
 
 class UserEmailVerificationView(View):
     def get(self, request, *args, **kwargs):
@@ -226,11 +226,11 @@ class UserEmailVerificationView(View):
             user = User.objects.get(email=email)
             user.is_email_verified = True
             user.save()
-            return JsonResponse({'message': 'Verified successfully!'}, status=200)
+            return JsonResponse({'message': 'Verified successfully!','status':'success'}, status=200)
         except SignatureExpired:
-                return JsonResponse({'message': 'Link expired!'}, status=400)
+                return JsonResponse({'message': 'Link expired!','status':'error'}, status=400)
         except (BadSignature, User.DoesNotExist):
-            return JsonResponse({'message': 'Invalid link.'}, status=400)
+            return JsonResponse({'message': 'Invalid link.','status':'error'}, status=400)
 
 class UserPhoneNumberSettingsView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -239,17 +239,17 @@ class UserPhoneNumberSettingsView(LoginRequiredMixin,View):
         phone_number = data.get('phoneNumber')
 
         if not request.user.is_authenticated:
-            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+            return JsonResponse({'message': 'Auth failed!.','status':'error'}, status=401)
         
         country = Country.objects.filter(iso2 = iso2).first()
         if not country:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
 
         if User.objects.filter(phone_country=country,phone_number=phone_number).exclude(id=request.user.id).exists():
-            return JsonResponse({'message': 'This phone number is already in use.'}, status=400)
+            return JsonResponse({'message': 'This phone number is already in use.','status':'error'}, status=400)
         
         if User.objects.filter(phone_country=country,phone_number=phone_number).exists():
-            return JsonResponse({'message': 'Your phone number verified!'}, status=400)
+            return JsonResponse({'message': 'Your phone number verified!','status':'error'}, status=400)
         
         account_sid = str(os.getenv('TWILIO_ACCOUNT_SID'))
         auth_token = str(os.getenv('TWILIO_AUTH_TOKEN'))
@@ -257,7 +257,7 @@ class UserPhoneNumberSettingsView(LoginRequiredMixin,View):
 
         verification_check = client.verify.v2.services(request.user.verify_sid).verifications.create(to=f"{country.dial_code}{phone_number}", channel='sms')
 
-        return JsonResponse({'message': 'Saved successfully!'}, status=200)
+        return JsonResponse({'message': 'Saved successfully!','status':'success'}, status=200)
     
 class UserPhoneNumberVerificationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -267,14 +267,14 @@ class UserPhoneNumberVerificationView(LoginRequiredMixin,View):
         sms_code = data.get('smsCode')
 
         if not request.user.is_authenticated:
-            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+            return JsonResponse({'message': 'Auth failed!.','status':'error'}, status=401)
         
         country = Country.objects.filter(iso2 = iso2).first()
         if not country:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
 
         if User.objects.filter(phone_country=country,phone_number=phone_number).exclude(id=request.user.id).exists():
-            return JsonResponse({'message': 'This phone number is already in use.'}, status=400)
+            return JsonResponse({'message': 'This phone number is already in use.','status':'error'}, status=400)
         
         account_sid = str(os.getenv('TWILIO_ACCOUNT_SID'))
         auth_token = str(os.getenv('TWILIO_AUTH_TOKEN'))
@@ -288,9 +288,9 @@ class UserPhoneNumberVerificationView(LoginRequiredMixin,View):
             user.phone_number = phone_number
             user.save()
         else:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
 
-        return JsonResponse({'message': 'Verified successfully!'}, status=200)
+        return JsonResponse({'message': 'Verified successfully!','status':'success'}, status=200)
 
 class UserPasswordSettingsView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -301,28 +301,28 @@ class UserPasswordSettingsView(LoginRequiredMixin,View):
         newPasswordConfirmation = data.get('newPasswordConfirmation')
         
         if not request.user.is_authenticated:
-            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+            return JsonResponse({'message': 'Auth failed!.','status':'error'}, status=401)
 
         user = authenticate(request, email=email, password=password)
 
         if user is not None:
             if newPassword != newPasswordConfirmation:
-                return JsonResponse({'message': 'Please make sure your passwords match.'}, status=400)
+                return JsonResponse({'message': 'Please make sure your passwords match.','status':'error'}, status=400)
             
             try:
                 validate_password(newPassword)
             except ValidationError as e:
-                return JsonResponse({'message': ' '.join(e.messages)}, status=400)
+                return JsonResponse({'message': ' '.join(e.messages),'status':'error'}, status=400)
             
             if password == newPassword:
-                return JsonResponse({'message': 'Sorry, your new password cannot be the same as your old password.'}, status=400)
+                return JsonResponse({'message': 'Sorry, your new password cannot be the same as your old password.','status':'error'}, status=400)
             
             user.set_password(newPassword)
             user.save()
         else:
-            return JsonResponse({'message': 'Auth failed! Invalid password.'}, status=400)
+            return JsonResponse({'message': 'Auth failed! Invalid password.','status':'error'}, status=400)
 
-        return JsonResponse({'message': 'Saved successfully!'}, status=200)
+        return JsonResponse({'message': 'Saved successfully!','status':'success'}, status=200)
     
 class UserPasswordResetView(View):
     def post(self, request, *args, **kwargs):
@@ -360,13 +360,13 @@ class UserPasswordResetView(View):
 
                 email_message.content_subtype = "html"  # HTML içeriği olarak gönder
                 email_message.send()
-                return JsonResponse({'message': 'Password reset link has been sent.'}, status=200)
+                return JsonResponse({'message': 'Password reset link has been sent.','status':'success'}, status=200)
             except User.DoesNotExist:
-                    return JsonResponse({'message': 'User not found. Please enter a valid email address.'}, status=400)
+                    return JsonResponse({'message': 'User not found. Please enter a valid email address.','status':'error'}, status=400)
             except BadHeaderError:
-                return JsonResponse({'message': 'Invalid header.'}, status=400)
+                return JsonResponse({'message': 'Invalid header.','status':'error'}, status=400)
 
-        return JsonResponse({'message': 'Invalid email.'}, status=400)
+        return JsonResponse({'message': 'Invalid email.','status':'error'}, status=400)
     
 class UserProfileSettingsView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -394,7 +394,7 @@ class UserProfileSettingsView(LoginRequiredMixin,View):
 
         profile.save()
 
-        return JsonResponse({'message': 'Saved successfully!'}, status=200)
+        return JsonResponse({'message': 'Saved successfully!','status':'success'}, status=200)
     
 class UserInformationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -404,7 +404,7 @@ class UserInformationView(LoginRequiredMixin,View):
         user = User.objects.filter(email = email).first()
 
         if not user:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
         
         user_data = {
                 'email': user.email,

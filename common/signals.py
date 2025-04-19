@@ -66,7 +66,7 @@ def import_process_update(sender, instance, **kwargs):
                     'private_' + str(instance.user.id),
                     {
                         "type": "send_alert",
-                        "message": {"message":f"{instance.model_name} items imported successfully!","status":200}
+                        "message": {"message":f"{instance.model_name} items imported successfully!","status":"success"}
                     }
                 )
                 #sendAlert({"message":f"{instance.model_name} items imported successfully!","status":200})
@@ -83,7 +83,7 @@ def import_process_update(sender, instance, **kwargs):
                     'private_' + str(instance.user.id),
                     {
                         "type": "send_alert",
-                        "message": {"message":f"{instance.model_name} items import rejected due to invalid data!","status":400}
+                        "message": {"message":f"{instance.model_name} items import rejected due to invalid data!","status":"error"}
                     }
                 )
                 #sendAlert({"message":f"{instance.model_name} items import rejected due to invalid data!","status":400})

@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 import uuid
 
 from companies.models import Company
-from data.models import Country,City
+from common.models import Country,City
 
 # Create your models here.
 
@@ -39,6 +39,9 @@ class Partner(models.Model):
     phone_country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="phone_country_partners")
     phone_number = models.CharField(_("Phone Number"), max_length=25, blank=True, null=True)
     email = models.EmailField(_("Email"), max_length=100, blank=True, null=True)
+    web = models.CharField(_("Web"), max_length=250, blank=True, null=True)
+
+    about = models.TextField(_("About"), blank = True, null = True)
     
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -50,3 +53,4 @@ class Partner(models.Model):
 
     def __str__(self):
         return str(self.name)
+

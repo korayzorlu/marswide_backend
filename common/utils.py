@@ -1,6 +1,7 @@
 from django.apps import apps
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.db.models import BooleanField
 
 import pandas as pd
 import io
@@ -56,7 +57,7 @@ class BaseImporter():
 
         return [
             field.name for field in self.model._meta.fields
-            if not field.null and not field.blank and field.name not in excluded_fields
+            if not field.null and not field.blank and not isinstance(field, BooleanField) and field.name not in excluded_fields
         ]
 
     def read_file(self):
@@ -133,6 +134,8 @@ class BaseImporter():
                 company = self.user.user_companies.filter(is_active=True).first().company,
                 name = row["name"],
                 formal_name = row["formal_name"],
+                vat_no = row.get("vat_no") or None,
+                vat_office = row.get("vat_office") or None,
                 address = row.get("address") or None,
                 email = row.get("email") or None,
                 types = type_list

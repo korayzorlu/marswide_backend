@@ -29,6 +29,8 @@ class PartnerListSerializer(serializers.Serializer):
     phoneCountry = serializers.SerializerMethodField(source = "phone_country")
     phoneNumber = serializers.CharField(source = "phone_number")
     email = serializers.EmailField()
+    web = serializers.EmailField()
+    about = serializers.CharField()
     
     def get_customer(self, obj):
         return True if "customer" in obj.types else False

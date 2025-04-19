@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "notifications",
     "data",
     "geoip2",
+    "accounting",
 ]
 
 MIDDLEWARE = [

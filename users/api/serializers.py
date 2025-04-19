@@ -5,7 +5,7 @@ from django.contrib.gis.geoip2 import GeoIP2
 from users.models import *
 from users.utils import get_client_ip,get_client_country
 from subscriptions.models import Subscription
-from data.models import Currency
+from common.models import Currency
 
 class UserListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -60,7 +60,7 @@ class UserListSerializer(serializers.Serializer):
     
     def get_location(self, obj):
         ip = get_client_ip(self.context.get("request"))
-        country = get_client_country(ip)
+        country = get_client_country("68.82.141.91")
         currency = Currency.objects.filter(countries__iso2=country).first()
         curr = currency.code if currency else ""
         return {"country":country,"currency":curr}

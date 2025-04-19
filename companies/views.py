@@ -21,10 +21,10 @@ class AddCompanyView(LoginRequiredMixin,View):
         formal_name = data.get('formalName')
 
         if not request.user.is_authenticated:
-            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+            return JsonResponse({'message': 'Auth failed!.','status':'error'}, status=401)
         
         if not name or not formal_name:
-            return JsonResponse({'message': 'Register failed! Fill required fields.'}, status=400)
+            return JsonResponse({'message': 'Register failed! Fill required fields.','status':'error'}, status=400)
 
         company = Company.objects.create(
             user = request.user,
@@ -56,7 +56,7 @@ class AddCompanyView(LoginRequiredMixin,View):
 
         user_company.save()
 
-        return JsonResponse({'message': 'Created successfully!'}, status=200)
+        return JsonResponse({'message': 'Created successfully!','status':'success'}, status=200)
     
 class UpdateCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -68,12 +68,12 @@ class UpdateCompanyView(LoginRequiredMixin,View):
         id = data.get('id')
         
         if not name or not formal_name:
-            return JsonResponse({'message': 'Register failed! Fill required fields.'}, status=400)
+            return JsonResponse({'message': 'Register failed! Fill required fields.','status':'error'}, status=400)
         
         company = Company.objects.filter(id = int(id), company_users__is_admin = True, company_users__user = self.request.user).first()
 
         if not company:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
 
         if image:
             old_image_path = company.image.path if company.image else ""
@@ -96,7 +96,7 @@ class UpdateCompanyView(LoginRequiredMixin,View):
 
         company.save()
 
-        return JsonResponse({'message': 'Saved successfully!'}, status=200)
+        return JsonResponse({'message': 'Saved successfully!','status':'success'}, status=200)
     
 class DeleteCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -109,7 +109,7 @@ class DeleteCompanyView(LoginRequiredMixin,View):
         company = Company.objects.filter(id = user_company.company.id, user = request.user).first()
 
         if not company:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
         
         user_companies.update(is_active = False)
 
@@ -122,7 +122,7 @@ class DeleteCompanyView(LoginRequiredMixin,View):
 
         
 
-        return JsonResponse({'message': 'Removed successfully!'}, status=200)
+        return JsonResponse({'message': 'Removed successfully!','status':'success'}, status=200)
 
 class UpdateUserCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -135,16 +135,16 @@ class UpdateUserCompanyView(LoginRequiredMixin,View):
         user_company = user_companies.filter(id = int(id)).first()
 
         if not user_company:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
 
         company = Company.objects.filter(id = user_company.company.id).first()
         self_user_company = UserCompany.objects.filter(company = company, user = self.request.user).first()
 
         if not self_user_company.is_admin:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
         
         if user_company == self_user_company or company.user == user_company.user:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
         
         print(status)
 
@@ -155,7 +155,7 @@ class UpdateUserCompanyView(LoginRequiredMixin,View):
             user_company.is_admin = False
             user_company.save()
 
-        return JsonResponse({'message': 'Changed successfully!'}, status=200)
+        return JsonResponse({'message': 'Changed successfully!','status':'success'}, status=200)
 
 class DeleteUserCompanyView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -167,16 +167,16 @@ class DeleteUserCompanyView(LoginRequiredMixin,View):
         user_company = user_companies.filter(id = int(id)).first()
 
         if not user_company:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
 
         company = Company.objects.filter(id = user_company.company.id).first()
         self_user_company = UserCompany.objects.filter(company = company, user = self.request.user).first()
 
         if not self_user_company.is_admin:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
         
         if user_company == self_user_company or company.user == user_company.user:
-            return JsonResponse({'message' : 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
         
         user_companies.update(is_active = False)
 
@@ -187,7 +187,7 @@ class DeleteUserCompanyView(LoginRequiredMixin,View):
             new_active_user_company.is_active = True
             new_active_user_company.save()
 
-        return JsonResponse({'message': 'Removed successfully!'}, status=200)
+        return JsonResponse({'message': 'Removed successfully!','status':'success'}, status=200)
 
 class AddInvitationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -196,19 +196,19 @@ class AddInvitationView(LoginRequiredMixin,View):
         company_id = data.get('companyId')
         
         if not request.user.is_authenticated:
-            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+            return JsonResponse({'message': 'Auth failed!.','status':'error'}, status=401)
         
         recipient = User.objects.filter(email = recipient_email).first()
 
         if not recipient:
-            return JsonResponse({'message': 'Failed! User not found'}, status=400)
+            return JsonResponse({'message': 'Failed! User not found','status':'error'}, status=400)
 
         company = Company.objects.filter(id = int(company_id)).first()
 
         user_company = UserCompany.objects.filter(user = recipient, company = company).first()
 
         if user_company:
-            return JsonResponse({'message': 'This user is already in company.'}, status=400)
+            return JsonResponse({'message': 'This user is already in company.','status':'error'}, status=400)
 
         old_invitations = Invitation.objects.filter(recipient = recipient, company = company)
         for old_invitation in old_invitations:
@@ -223,7 +223,7 @@ class AddInvitationView(LoginRequiredMixin,View):
 
         invitation.save()
 
-        return JsonResponse({'message': 'Sent successfully!'}, status=200)
+        return JsonResponse({'message': 'Sent successfully!','status':'success'}, status=200)
     
 class ConfirmInvitationView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -232,17 +232,17 @@ class ConfirmInvitationView(LoginRequiredMixin,View):
         status = data.get('status')
         
         if not request.user.is_authenticated:
-            return JsonResponse({'message': 'Auth failed!.'}, status=401)
+            return JsonResponse({'message': 'Auth failed!.','status':'error'}, status=401)
         
         invitation = Invitation.objects.filter(id = id, recipient = request.user).first()
 
         if not invitation:
-            return JsonResponse({'message': 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message': 'Sorry, something went wrong!','status':'error'}, status=400)
 
         company = Company.objects.filter(id = invitation.company.id).first()
 
         if not company:
-            return JsonResponse({'message': 'Sorry, something went wrong!'}, status=400)
+            return JsonResponse({'message': 'Sorry, something went wrong!','status':'error'}, status=400)
 
         if status == "accepted":
             invitation.status = "accepted"
@@ -259,9 +259,9 @@ class ConfirmInvitationView(LoginRequiredMixin,View):
             )
             user_company.save()
 
-            return JsonResponse({'message':'Accepted invitation!'}, status=200)
+            return JsonResponse({'message':'Accepted invitation!','status':'success'}, status=200)
         elif status == "declined":
             invitation.status = "declined"
             invitation.save()
 
-            return JsonResponse({'message':'Declined invitation!'}, status=200)
+            return JsonResponse({'message':'Declined invitation!','status':'success'}, status=200)

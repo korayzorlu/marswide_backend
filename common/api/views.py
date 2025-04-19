@@ -1,5 +1,6 @@
 from django.core.validators import EMPTY_VALUES
 from django.db.models import QuerySet, Q
+from django.db.models.functions import Lower,Upper
 from rest_framework import generics
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework_datatables.filters import DatatablesFilterBackend
@@ -77,6 +78,100 @@ class QueryListAPIView(generics.ListAPIView):
                 self._paginator = None
         return self._paginator
 
+class CountryList(ModelViewSet, QueryListAPIView):
+    serializer_class = CountryListSerializer
+    filterset_fields = {
+                        'name': ['exact','in', 'isnull'],
+    }
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        custom_related_fields = []
+
+        queryset = Country.objects.select_related(*custom_related_fields).filter().order_by("id")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["name","formal_name","iso2","iso3","dial_code"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+
+class CityFilter(FilterSet):
+    id = CharFilter(method = 'filter_id')
+    name = CharFilter(method = 'filter_name')
+
+    class Meta:
+        model = City
+        fields = ['id','name']
+
+    def filter_id(self, queryset, id, value):
+        return queryset.filter(id = int(value))
+    
+    def filter_name(self, queryset, name, value):
+        print(value)
+        return queryset.annotate(lowercase=Lower('name'),uppercase=Upper('name')).filter(Q(lowercase__icontains = value) | Q(uppercase__icontains = value))
+
+class CityList(ModelViewSet, QueryListAPIView):
+    serializer_class = CityListSerializer
+    #filterset_fields = {}
+    filterset_class = CityFilter
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission,BlockBrowserAccessPermission]
+    
+    def get_queryset(self):
+        country_iso2 = self.request.query_params.get('country')
+
+        custom_related_fields = ["country"]
+
+        queryset = City.objects.select_related(*custom_related_fields).filter(country__iso2 = country_iso2).order_by("name")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["name","country__name"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+    
+class CurrencyList(ModelViewSet, QueryListAPIView):
+    serializer_class = CurrencyListSerializer
+    filterset_fields = {
+                        'code': ['exact','in', 'isnull'],
+    }
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        custom_related_fields = []
+
+        queryset = Currency.objects.select_related(*custom_related_fields).filter().order_by("code")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["code","name","symbol"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+    
 class ImportProcessList(ModelViewSet, QueryListAPIView):
     serializer_class = ImportProcessListSerializer
     filterset_fields = {
