@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -226,7 +226,8 @@ class UserEmailVerificationView(View):
             user = User.objects.get(email=email)
             user.is_email_verified = True
             user.save()
-            return JsonResponse({'message': 'Verified successfully!','status':'success'}, status=200)
+            return redirect(f"{os.getenv("BASE_URL")}/settings/auth/email")
+            #return JsonResponse({'message': 'Verified successfully!','status':'success'}, status=200)
         except SignatureExpired:
                 return JsonResponse({'message': 'Link expired!','status':'error'}, status=400)
         except (BadSignature, User.DoesNotExist):
