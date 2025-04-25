@@ -15,6 +15,9 @@ class MenuItemListSerializer(serializers.Serializer):
                 {"type" : "item", "class" : "free", "label" : "Invitations", "icon" : "mail", "route" : "/invitations"}
             ]},
             {"type" : "item", "class" : "free", "label" : "Partners", "icon" : "handshake", "route" : "/partners"},
+            {"type" : "sub_menu", "class" : "free", "label" : "Accounting", "icon" : "accounting", "items" : [
+                {"type" : "item", "class" : "free", "label" : "Accounts", "icon" : "account", "route" : "/accounts"}
+            ]},
             {"type" : "sub_menu", "class" : "free", "label" : "Mikro", "icon" : "database", "items" : [
                 {"type" : "item", "class" : "free", "label" : "Cari Hesap Hareketleri", "icon" : "home", "route" : "/cari-hesap-hareketleri"},
                 {"type" : "item", "class" : "free", "label" : "Personeller", "icon" : "home", "route" : "/personeller"},

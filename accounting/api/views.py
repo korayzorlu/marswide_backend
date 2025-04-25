@@ -96,13 +96,32 @@ class DatatablesPagination(LimitOffsetPagination):
             'recordsFiltered': self.count,
             'data': data
         })
+
+class AccountFilter(FilterSet):
+    uuid = CharFilter(method = 'filter_uuid')
+    type = CharFilter(method = 'filter_type')
+    partner = CharFilter(method = 'filter_partner')
+
+    class Meta:
+        model = Account
+        fields = ['uuid','type','partner']
+
+    def filter_uuid(self, queryset, uuid, value):
+        return queryset.filter(uuid = value)
+    
+    def filter_type(self, queryset, type, value):
+        return queryset.filter(type = value)
+    
+    def filter_partner(self, queryset, partner, value):
+        return queryset.filter(partner__uuid = value)
     
 class AccountList(ModelViewSet, QueryListAPIView):
     serializer_class = AccountListSerializer
-    filterset_fields = {
-                        'uuid': ['exact','in', 'isnull'],
-                        'company': ['exact','in', 'isnull'],
-    }
+    # filterset_fields = {
+    #                     'uuid': ['exact','in', 'isnull'],
+    #                     'company': ['exact','in', 'isnull'],
+    # }
+    filterset_class = AccountFilter
     filter_backends = [OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'
     pagination_class = DatatablesPagination

@@ -1,5 +1,6 @@
 from django.core.validators import EMPTY_VALUES
 from django.db.models import QuerySet, Q
+from django.db.models.functions import Lower,Upper
 from rest_framework import generics
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework_datatables.filters import DatatablesFilterBackend
@@ -96,13 +97,28 @@ class DatatablesPagination(LimitOffsetPagination):
             'recordsFiltered': self.count,
             'data': data
         })
+
+class PartnerFilter(FilterSet):
+    uuid = CharFilter(method = 'filter_uuid')
+    types = CharFilter(method = 'filter_types')
+    name = CharFilter(method = 'filter_name')
+
+    class Meta:
+        model = Partner
+        fields = ['uuid','types','name']
+
+    def filter_uuid(self, queryset, uuid, value):
+        return queryset.filter(uuid = value)
+    
+    def filter_types(self, queryset, types, value):
+        return queryset.filter(types__overlap = value)
+    
+    def filter_name(self, queryset, name, value):
+        return queryset.annotate(lowercase=Lower('name'),uppercase=Upper('name')).filter(Q(lowercase__icontains = value) | Q(uppercase__icontains = value))
     
 class PartnerList(ModelViewSet, QueryListAPIView):
     serializer_class = PartnerListSerializer
-    filterset_fields = {
-                        'uuid': ['exact','in', 'isnull'],
-                        'company': ['exact','in', 'isnull'],
-    }
+    filterset_class = PartnerFilter
     filter_backends = [OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'
     pagination_class = DatatablesPagination

@@ -8,15 +8,20 @@ class AccountListSerializer(serializers.Serializer):
     companyId = serializers.SerializerMethodField()
     partner = serializers.SerializerMethodField()
     currency = serializers.SerializerMethodField()
+    type = serializers.CharField()
+    balance = serializers.DecimalField(max_digits=14,decimal_places=2)
     
     def get_companyId(self, obj):
         return obj.company.id if obj.company else ''
-    
+
     def get_partner(self, obj):
-        return obj.partner.name if obj.partner else False
+        return {"uuid":obj.partner.uuid,"name":obj.partner.name} if obj.partner else {}
     
     def get_currency(self, obj):
-        return obj.currency.code if obj.currency else False
+        return obj.currency.code if obj.currency else ''
+    
+    # def get_type(self, obj):
+    #     return obj.get_type_display()
 
     def update(self, instance, validated_data):
         info = model_meta.get_field_info(instance)

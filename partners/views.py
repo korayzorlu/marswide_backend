@@ -15,23 +15,14 @@ from .models import *
 from .tasks import importPartners
 from .utils import is_valid_partner_data, get_partner_types
 from common.models import ImportProcess
-from common.utils import BaseImporter
+from common.utils.import_utils import BaseImporter
+from common.utils.websocket_utils import send_alert
 
 import os
 import json
 import pandas as pd
 
 # Create your views here.
-
-def sendAlert(message):
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        'public_room',
-        {
-            "type": "send_alert",
-            "message": message,
-        }
-    )
 
 class AddPartnerView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -177,7 +168,7 @@ class ImportPartnersView(LoginRequiredMixin,View):
         if importer.validate_file() != 200:
             return JsonResponse(importer.validate_file(), status=400)
 
-        sendAlert({"message":"Items importing on background...",'status':'success'})
+        send_alert({"message":"Items importing on background...",'status':'success'},room=f"private_{request.user.id}")
 
         df_json = importer.read_file()
         if isinstance(importer.read_file(), dict):

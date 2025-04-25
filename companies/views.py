@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 from django.utils.crypto import get_random_string
 
 from .models import *
+from users.models import User
 
 import os
 import json

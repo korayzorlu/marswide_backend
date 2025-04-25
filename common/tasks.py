@@ -6,7 +6,7 @@ import pandas as pd
 import io
 
 from .models import ImportProcess
-from .utils import BaseImporter
+from .utils.import_utils import BaseImporter
 from users.models import User
 
 

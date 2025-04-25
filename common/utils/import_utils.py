@@ -8,7 +8,7 @@ import io
 import os
 
 from users.models import User
-from .models import ImportProcess
+from common.models import ImportProcess
 from partners.models import Partner
 
 class BaseImporter():
@@ -81,7 +81,7 @@ class BaseImporter():
             return {"message": f"File read error: {str(e)}"}
 
     def start_import(self, df_json):
-        from .tasks import importData
+        from common.tasks import importData
         importData.delay(df_json, self.user.id, self.app, self.model_name)
 
     def process_import(self, df_json):

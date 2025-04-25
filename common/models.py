@@ -3,7 +3,6 @@ from django.conf import settings
 
 from django.utils.translation import gettext_lazy as _
 
-from users.models import User
 from companies.models import Company
 
 # Create your models here.
