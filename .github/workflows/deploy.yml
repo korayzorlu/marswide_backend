@@ -48,7 +48,7 @@ jobs:
     - name: Django settings and test
       env:
         DJANGO_SETTINGS_MODULE: core.settings
-        DATABASE_URL: postgres://postgres:mars@db:5432/marswidedb_test
+        DATABASE_URL: postgres://postgres:mars@db:5433/marswidedb_test
       run: |
         docker-compose exec web python manage.py migrate
 
