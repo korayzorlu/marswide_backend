@@ -20,11 +20,11 @@ class MenuItemListSerializer(serializers.Serializer):
                 {"type" : "item", "class" : "free", "label" : "Invoices", "icon" : "invoice", "route" : "/invoices"},
                 {"type" : "item", "class" : "free", "label" : "Payments", "icon" : "payment", "route" : "/payments"}
             ]},
-            # {"type" : "sub_menu", "class" : "free", "label" : "Mikro", "icon" : "database", "items" : [
-            #     {"type" : "item", "class" : "free", "label" : "Cari Hesap Hareketleri", "icon" : "home", "route" : "/cari-hesap-hareketleri"},
-            #     {"type" : "item", "class" : "free", "label" : "Personeller", "icon" : "home", "route" : "/personeller"},
-            #     {"type" : "item", "class" : "free", "label" : "Personel Tahakkukları", "icon" : "home", "route" : "/personel_tahakkuklari"}
-            # ]}
+            {"type" : "sub_menu", "class" : "free", "label" : "Mikro", "icon" : "database", "items" : [
+                {"type" : "item", "class" : "free", "label" : "Cari Hesap Hareketleri", "icon" : "home", "route" : "/cari-hesap-hareketleri"},
+                {"type" : "item", "class" : "free", "label" : "Personeller", "icon" : "home", "route" : "/personeller"},
+                {"type" : "item", "class" : "free", "label" : "Personel Tahakkukları", "icon" : "home", "route" : "/personel_tahakkuklari"}
+            ]}
         ]
 
         hierarchy = {
