@@ -98,9 +98,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./dbbackup:/backup
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: mars
+      POSTGRES_PASSWORD: 9527
+      POSTGRES_DB: marswidedb
     ports:
       - "5433:5432"
     restart: always
