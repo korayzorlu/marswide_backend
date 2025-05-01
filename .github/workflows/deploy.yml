@@ -45,13 +45,6 @@ jobs:
         docker-compose down --remove-orphans
         docker-compose -f docker-compose.prod.yml up --build -d
     
-    - name: Create DB user and database if not exists
-      run: |
-        docker-compose exec db bash -c "
-          psql -U postgres -tc \"SELECT 1 FROM pg_roles WHERE rolname='mars';\" | grep -q 1 || psql -U postgres -c \"CREATE USER mars WITH PASSWORD '9527';\";
-          psql -U postgres -tc \"SELECT 1 FROM pg_database WHERE datname='marswide';\" | grep -q 1 || psql -U postgres -c \"CREATE DATABASE marswidedb OWNER mars;\";
-        "
-
     - name: Django settings and test
       env:
         DJANGO_SETTINGS_MODULE: core.settings
