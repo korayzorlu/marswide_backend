@@ -17,6 +17,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from core.permissions import SubscriptionPermission,BlockBrowserAccessPermission,RequireCustomHeaderPermission
 
 from .serializers import *
+from .filters import *
 
 class QueryListAPIView(generics.ListAPIView):
     def get_queryset(self):
@@ -129,12 +130,140 @@ class AccountList(ModelViewSet, QueryListAPIView):
     permission_classes = [SubscriptionPermission]
     
     def get_queryset(self):
-        active_company_id = self.request.query_params.get('active_company')
-        active_company = self.request.user.user_companies.filter(id = active_company_id).first()
+        active_company_uuid = self.request.query_params.get('active_company')
+        active_company = self.request.user.user_companies.filter(uuid = active_company_uuid).first()
 
         custom_related_fields = ["partner","currency"]
 
         queryset = Account.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("partner__name")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["partner__name","currency__code"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+
+class TransactionFilter(FilterSet):
+    uuid = CharFilter(method = 'filter_uuid')
+    type = CharFilter(method = 'filter_type')
+    account = CharFilter(method = 'filter_account')
+    currency = CharFilter(method = 'filter_currency')
+
+    class Meta:
+        model = Transaction
+        fields = ['uuid','type','account__partner','account__currency']
+
+    def filter_uuid(self, queryset, uuid, value):
+        return queryset.filter(uuid = value)
+    
+    def filter_type(self, queryset, type, value):
+        return queryset.filter(type = value)
+    
+    def filter_account(self, queryset, account, value):
+        return queryset.filter(account__uuid = value)
+    
+    def filter_currency(self, queryset, account__currency, value):
+        return queryset.filter(account__currency__code = value)
+    
+class TransactionList(ModelViewSet, QueryListAPIView):
+    serializer_class = TransactionListSerializer
+    # filterset_fields = {
+    #                     'uuid': ['exact','in', 'isnull'],
+    #                     'company': ['exact','in', 'isnull'],
+    # }
+    filterset_class = TransactionFilter
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    pagination_class = DatatablesPagination
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        active_company_uuid = self.request.query_params.get('active_company')
+        active_company = self.request.user.user_companies.filter(uuid = active_company_uuid).first()
+
+        custom_related_fields = ["account__partner","account__currency"]
+
+        queryset = Transaction.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("account__partner__name")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["account__partner__name","account__currency__code"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+    
+class InvoiceFilter(FilterSet):
+    uuid = CharFilter(method = 'filter_uuid')
+    type = CharFilter(method = 'filter_type')
+    partner = CharFilter(method = 'filter_partner')
+
+    class Meta:
+        model = Invoice
+        fields = ['uuid','type','partner']
+
+    def filter_uuid(self, queryset, uuid, value):
+        return queryset.filter(uuid = value)
+    
+    def filter_type(self, queryset, type, value):
+        return queryset.filter(type = value)
+    
+    def filter_partner(self, queryset, partner, value):
+        return queryset.filter(partner__uuid = value)
+    
+class InvoiceList(ModelViewSet, QueryListAPIView):
+    serializer_class = InvoiceListSerializer
+    filterset_class = InvoiceFilter
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    pagination_class = DatatablesPagination
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        active_company_uuid = self.request.query_params.get('active_company')
+        active_company = self.request.user.user_companies.filter(uuid = active_company_uuid).first()
+
+        custom_related_fields = ["partner","currency"]
+
+        queryset = Invoice.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("partner__name","date")
+
+        query = self.request.query_params.get('search[value]', None)
+        if query:
+            search_fields = ["partner__name","currency__code"]
+            
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f"{field}__icontains": query})
+            
+            queryset = queryset.filter(q_objects)
+        return queryset
+    
+class PaymentList(ModelViewSet, QueryListAPIView):
+    serializer_class = PaymentListSerializer
+    filterset_class = PaymentFilter
+    filter_backends = [OrderingFilter,DjangoFilterBackend]
+    ordering_fields = '__all__'
+    pagination_class = DatatablesPagination
+    required_subscription = "free"
+    permission_classes = [SubscriptionPermission]
+    
+    def get_queryset(self):
+        active_company_uuid = self.request.query_params.get('active_company')
+        active_company = self.request.user.user_companies.filter(uuid = active_company_uuid).first()
+
+        custom_related_fields = ["partner","currency"]
+
+        queryset = Payment.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("partner__name","date")
 
         query = self.request.query_params.get('search[value]', None)
         if query:

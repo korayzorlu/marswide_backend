@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Account
+from .models import *
 
 # Register your models here.
 
@@ -25,3 +25,68 @@ class AccountAdmin(admin.ModelAdmin):
     
     class Meta:
         model = Account
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ["company__name","account","date","type","amount","currency"]
+    list_display_links = ["account"]
+    search_fields = ["account__partner__name","date","type","amount","account__currency__code"]
+    list_filter = []
+    inlines = []
+    ordering = ["company__name","account__partner__name"]
+    
+    def company(self,obj):
+        return obj.company.name if obj.company else ""
+    def account(self,obj):
+        return obj.acount.partner.name if obj.account else ""
+    def currency(self,obj):
+        return obj.account.currency.code if obj.account else ""
+    
+    class Meta:
+        model = Transaction
+
+@admin.register(Invoice)
+class InvoiceAdmin(admin.ModelAdmin):
+    list_display = ["company","partner","type","currency","amount"]
+    list_display_links = ["partner"]
+    search_fields = ["company__name","partner__name","type","currency__code","amount"]
+    list_filter = []
+    inlines = []
+    ordering = ["company__name","partner__name"]
+    
+    def company(self,obj):
+        return obj.company.name if obj.company else ""
+    def partner(self,obj):
+        return obj.partner.name if obj.partner else ""
+    def currency(self,obj):
+        return obj.currency.code if obj.currency else ""
+    
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
+    
+    class Meta:
+        model = Invoice
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ["company","partner","type","currency","amount"]
+    list_display_links = ["partner"]
+    search_fields = ["company__name","partner__name","type","currency__code","amount"]
+    list_filter = []
+    inlines = []
+    ordering = ["company__name","partner__name"]
+    
+    def company(self,obj):
+        return obj.company.name if obj.company else ""
+    def partner(self,obj):
+        return obj.partner.name if obj.partner else ""
+    def currency(self,obj):
+        return obj.currency.code if obj.currency else ""
+    
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
+    
+    class Meta:
+        model = Payment

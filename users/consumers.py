@@ -16,7 +16,7 @@ class MainConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        self.room_name = str(user.id)
+        self.room_name = str(user.uuid)
         self.room_group_name = f"private_{self.room_name}"
         self.group_name = 'public_room'
         

@@ -6,7 +6,7 @@ from companies.models import *
 from users.models import User
 
 class CompanyListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.CharField(source = "uuid")
     image = serializers.ImageField()
     name = serializers.CharField()
     formalName = serializers.CharField(source = "formal_name")
@@ -35,7 +35,7 @@ class CompanyListSerializer(serializers.Serializer):
         return instance
     
 class UserCompanyListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.CharField(source = "uuid")
     user = serializers.SerializerMethodField()
     userId = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()

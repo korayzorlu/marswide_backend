@@ -50,7 +50,7 @@ class Country(models.Model):
     
 class City(models.Model):
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="country_cities")
-    name = models.CharField(_("City"), max_length=150, null=True, blank=True)
+    name = models.CharField(_("City"), max_length=150, null=True, blank=True, db_index=True)
 
     created_date = models.DateTimeField(auto_now_add=True, null=True)
     updated_date = models.DateTimeField(auto_now=True, null=True)

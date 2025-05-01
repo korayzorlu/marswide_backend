@@ -15,7 +15,7 @@ import json
 
 # Create your views here.
 
-class TestView(LoginRequiredMixin,View):
+class ExampleView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
 

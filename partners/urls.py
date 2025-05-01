@@ -14,7 +14,7 @@ urlpatterns = [
     path('partners_template/', PartnersTemplateView.as_view(), name="partners_template"),
     path('import_partners/', ImportPartnersView.as_view(), name="import_partners"),
 
-    path('test/', TestView.as_view(), name="test"),
+    path('test/', ExampleView.as_view(), name="test"),
     
     path('', include("partners.api.urls")),
 ]

@@ -126,8 +126,8 @@ class PartnerList(ModelViewSet, QueryListAPIView):
     permission_classes = [SubscriptionPermission]
     
     def get_queryset(self):
-        active_company_id = self.request.query_params.get('active_company')
-        active_company = self.request.user.user_companies.filter(id = active_company_id).first()
+        active_company_uuid = self.request.query_params.get('active_company')
+        active_company = self.request.user.user_companies.filter(uuid = active_company_uuid).first()
 
         custom_related_fields = ["company"]
 

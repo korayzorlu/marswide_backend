@@ -18,7 +18,7 @@ class UserAdmin(UserAdmin):
     search_fields = ["username","email","first_name","last_name"]
     list_filter = []
     inlines = []
-    ordering = ["-id"]
+    ordering = ["email"]
 
     fieldsets = UserAdmin.fieldsets + (
         ("More details", {"fields": ["is_email_verified","phone_country","phone_number","verify_sid"]}),

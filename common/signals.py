@@ -27,35 +27,35 @@ def import_process_update(sender, instance, **kwargs):
             if instance.status == "in_progress":
                 fetch_import_processes(
                     message={"status":instance.status,"model":instance.model_name,"activeCompany": {"id":instance.company.id}},
-                    room=f"private_{instance.user.id}"
+                    room=f"private_{instance.user.uuid}"
                 )
             elif instance.status == "completed":
                 fetch_import_processes(
                     message={"status":instance.status,"model":instance.model_name,"activeCompany": {"id":instance.company.id}},
-                    room=f"private_{instance.user.id}"
+                    room=f"private_{instance.user.uuid}"
                 )
                 send_alert(
                     message={"message":f"{instance.model_name} items imported successfully!","status":"success"},
-                    room=f"private_{instance.user.id}"
+                    room=f"private_{instance.user.uuid}"
                 )
             elif instance.status == "rejected":
                 fetch_import_processes(
                     message={"status":instance.status,"model":instance.model_name,"activeCompany": {"id":instance.company.id}},
-                    room=f"private_{instance.user.id}"
+                    room=f"private_{instance.user.uuid}"
                 )
                 send_alert(
                     message={"message":f"{instance.model_name} items import rejected due to invalid data!","status":"error"},
-                    room=f"private_{instance.user.id}"
+                    room=f"private_{instance.user.uuid}"
                 )
         if old_instance.progress != instance.progress:
             send_import_process_percent(
                 message={"progress":instance.progress,"task":instance.task_id},
-                room=f"private_{instance.user.id}"
+                room=f"private_{instance.user.uuid}"
             )
 
 @receiver(post_delete, sender=ImportProcess)
 def import_process_delete(sender, instance, **kwargs):
     fetch_import_processes(
         message={"status":instance.status,"model":instance.model_name,"activeCompany": {"id":instance.company.id}},
-        room=f"private_{instance.user.id}"
+        room=f"private_{instance.user.uuid}"
     )

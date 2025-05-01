@@ -13,9 +13,9 @@ from core.middleware import get_current_user
 @receiver(post_save, sender=Notification)
 def notification_created(sender, instance, created, **kwargs):
     if created:
-        send_notification(message=instance.message,room=f"private_{instance.user.id}")
+        send_notification(message=instance.message,room=f"private_{instance.user.uuid}")
         
 
 @receiver(post_delete, sender=Notification)
 def notification_deleted(sender, instance, **kwargs):
-    send_notification(message="deleted",room=f"private_{instance.user.id}")
+    send_notification(message="deleted",room=f"private_{instance.user.uuid}")

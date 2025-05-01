@@ -16,7 +16,9 @@ class MenuItemListSerializer(serializers.Serializer):
             ]},
             {"type" : "item", "class" : "free", "label" : "Partners", "icon" : "handshake", "route" : "/partners"},
             {"type" : "sub_menu", "class" : "free", "label" : "Accounting", "icon" : "accounting", "items" : [
-                {"type" : "item", "class" : "free", "label" : "Accounts", "icon" : "account", "route" : "/accounts"}
+                {"type" : "item", "class" : "free", "label" : "Accounts", "icon" : "account", "route" : "/accounts"},
+                {"type" : "item", "class" : "free", "label" : "Invoices", "icon" : "invoice", "route" : "/invoices"},
+                {"type" : "item", "class" : "free", "label" : "Payments", "icon" : "payment", "route" : "/payments"}
             ]},
             {"type" : "sub_menu", "class" : "free", "label" : "Mikro", "icon" : "database", "items" : [
                 {"type" : "item", "class" : "free", "label" : "Cari Hesap Hareketleri", "icon" : "home", "route" : "/cari-hesap-hareketleri"},

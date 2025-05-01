@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
+import uuid
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
@@ -11,6 +12,7 @@ def get_sentinel_user():
     return User.objects.get_or_create(username="unknown")[0]
 
 class Company(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(get_sentinel_user), blank = True, null = True, related_name="company")
     name = models.CharField(_("Company Name"), max_length=140)
     formal_name = models.CharField(_("Company Formal Name"), max_length=140, blank = True, null=True)
@@ -26,6 +28,7 @@ class Company(models.Model):
         return str(self.name)
     
 class UserCompany(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_companies")
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_users")
     is_active = models.BooleanField(default=False)
