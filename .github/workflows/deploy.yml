@@ -41,7 +41,9 @@ jobs:
     
     - name: Create .env file
       run: |
-        echo "${{ secrets.ENV_FILE }}" > .env
+        cat <<EOF > marswide_backend/.env
+        ${{ secrets.ENV_FILE }}
+        EOF
         
     - name: Django settings and test
       env:
