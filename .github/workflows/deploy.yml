@@ -50,6 +50,7 @@ jobs:
         DJANGO_SETTINGS_MODULE: core.settings
         DATABASE_URL: postgres://postgres:mars@db:5432/marswidedb_test
       run: |
+        docker network create marswide_network
         docker-compose down --remove-orphans && docker-compose -f docker-compose.prod.yml up --build -d
         docker-compose exec web python manage.py test
 
