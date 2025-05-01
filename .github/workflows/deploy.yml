@@ -55,3 +55,5 @@ jobs:
           cd /home/admin/marswide/marswide_backend
           git pull origin master
           docker-compose down --remove-orphans && docker-compose -f docker-compose.prod.yml up --build -d
+
+          
