@@ -23,21 +23,21 @@ jobs:
       run: docker network create marswide_network || true
 
     - name: Docker Compose başlat
-      run: docker-compose -f docker-compose.prod.yml up --build -d
+      run: docker compose -f docker-compose.prod.yml up --build -d
 
     - name: Servisleri kontrol et
-      run: docker-compose ps
+      run: docker compose ps
 
     # Örnek test: Uygulama ayakta mı?
     - name: Web servisi ayakta mı?
       run: curl --fail http://localhost:8000 || exit 1
 
     - name: Django settings and test
-      run: docker-compose exec web python manage.py migrate
+      run: docker compose exec web python manage.py migrate
 
     - name: Servisleri durdur
       if: always()
-      run: docker-compose down
+      run: docker compose down
 
     
 
