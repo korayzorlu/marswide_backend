@@ -142,9 +142,9 @@ else:
     DATABASES = {
             'default': {
                 'ENGINE': 'dj_db_conn_pool.backends.postgresql',
-                'NAME': 'marswidedb',
-                'USER': 'mars',
-                'PASSWORD': '9527',
+                'NAME': str(os.getenv('PG_DB')),
+                'USER': str(os.getenv('PG_USER')),
+                'PASSWORD': str(os.getenv('PG_PASSWORD')),
                 'HOST': 'db',
                 'PORT': '',
                 'POOL_OPTIONS': {
