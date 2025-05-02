@@ -22,7 +22,7 @@ jobs:
     - name: Install ghostscript fonts
       run: |
         sudo apt-get update
-        sudo apt-get install -y fonts-urw-base35
+        sudo apt-get install -y gsfonts fonts-urw-base35
 
     - name: Install Docker Compose
       run: |
