@@ -19,51 +19,27 @@ jobs:
       with:
         python-version: '3.12'
     
-    - name: Install ghostscript fonts
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gsfonts fonts-urw-base35
-    
-    -
-        name: Set up Docker
-        uses: docker/setup-docker-action@v4
+    - name: Docker Compose network oluştur (external network varsa)
+      run: docker network create marswide_network || true
 
-    -
-        name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-    
-    - name: Create .env file
-      run: |
-        cat <<EOF > .env
-        ${{ secrets.ENV_FILE }}
-        EOF
-    
-    - name: Build and Push Docker image
-      run: |
-        docker network create marswide_network
-        docker-compose down --remove-orphans
-        docker-compose -f docker-compose.prod.yml up --build -d
+    - name: Docker Compose başlat
+      run: docker-compose -f docker-compose.prod.yml up --build -d
 
-    - name: Create DB user and database if not exists
-      run: |
-        docker-compose exec db psql -U postgres -c "
-            CREATE USER mars WITH PASSWORD '9527';
-            CREATE DATABASE marswidedb;
-            GRANT ALL PRIVILEGES ON DATABASE marswidedb TO mars;
-            ALTER DATABASE marswidedb OWNER TO mars;
-        "
+    - name: Servisleri kontrol et
+      run: docker-compose ps
 
-    
-    - name: Wait for PostgreSQL
-      run: |
-        until docker-compose exec db pg_isready -U postgres; do
-        echo "Waiting for PostgreSQL to be ready..."
-        sleep 2
-        done
+    # Örnek test: Uygulama ayakta mı?
+    - name: Web servisi ayakta mı?
+      run: curl --fail http://localhost:8000 || exit 1
 
     - name: Django settings and test
-      run: |
-        docker-compose exec web python manage.py migrate
+      run: docker-compose exec web python manage.py migrate
+
+    - name: Servisleri durdur
+      if: always()
+      run: docker-compose down
+
+    
 
   deploy:
     needs: build
