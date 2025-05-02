@@ -41,6 +41,16 @@ jobs:
         docker network create marswide_network
         docker-compose down --remove-orphans
         docker-compose -f docker-compose.prod.yml up --build -d
+
+    - name: Create DB user and database if not exists
+      run: |
+        docker-compose exec db psql -U postgres -c "
+            CREATE USER mars WITH PASSWORD '9527';
+            CREATE DATABASE marswidedb;
+            GRANT ALL PRIVILEGES ON DATABASE marswidedb TO mars;
+            ALTER DATABASE marswidedb OWNER TO mars;
+        "
+
     
     - name: Wait for PostgreSQL
       run: |
