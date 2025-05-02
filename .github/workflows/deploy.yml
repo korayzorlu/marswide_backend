@@ -10,14 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      docker:
-        image: docker:19.03.12
-        options: --privileged
-        ports:
-          - 8000:8000
-          - 5433:5432
-
     steps:
     - name: Clone repo
       uses: actions/checkout@v3
@@ -45,6 +37,13 @@ jobs:
         docker-compose down --remove-orphans
         docker-compose -f docker-compose.prod.yml up --build -d
     
+    - name: Wait for PostgreSQL
+      run: |
+        until docker-compose exec db pg_isready -U postgres; do
+        echo "Waiting for PostgreSQL to be ready..."
+        sleep 2
+        done
+
     - name: Django settings and test
       run: |
         docker-compose exec web python manage.py migrate
