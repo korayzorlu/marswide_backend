@@ -42,6 +42,13 @@ jobs:
         docker-compose down --remove-orphans
         docker-compose -f docker-compose.prod.yml up --build -d
 
+    - name: Wait for PostgreSQL
+      run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          until docker-compose exec -T db pg_isready -U postgres; do
+            sleep 2
+          done
+
     - name: Create DB user and database if not exists
       run: |
         docker-compose run --rm db psql -U postgres -c "CREATE USER mars WITH PASSWORD '9527';" || true
@@ -50,12 +57,7 @@ jobs:
         docker-compose run --rm db psql -U postgres -c "ALTER DATABASE marswidedb OWNER TO mars;" || true
 
     
-    - name: Wait for PostgreSQL
-      run: |
-        until docker-compose exec db pg_isready -U postgres; do
-        echo "Waiting for PostgreSQL to be ready..."
-        sleep 2
-        done
+   
 
     - name: Django settings and test
       run: |
