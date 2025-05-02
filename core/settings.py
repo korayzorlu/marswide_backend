@@ -121,22 +121,27 @@ CHANNEL_LAYERS= {
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-USE_RDS = config('USE_RDS', cast = bool, default = False)
+DB_TEST = config('DB_TEST', cast = bool, default = False)
 
-if USE_RDS:
+if DB_TEST:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            #'ENGINE': 'django_postgrespool2',
-            'NAME': 'postgres',
-            'USER': 'micho',
-            'PASSWORD': 'Novu.23.PG!',
-            'HOST': 'micho-app-db.czrnghcpuvme.eu-central-1.rds.amazonaws.com',
-            'PORT': os.getenv("PG_PORT",""),
-            "TEST": {
-                "NAME": "postgres",
-            },
-        }
+            'default': {
+                'ENGINE': 'dj_db_conn_pool.backends.postgresql',
+                'NAME': 'postgres',
+                'USER': 'postgres',
+                'PASSWORD': 'postgres',
+                'HOST': 'db',
+                'PORT': '',
+                'POOL_OPTIONS': {
+                    'POOL_SIZE': 100,
+                    'MAX_OVERFLOW': 50,
+                    'RECYCLE': 300
+                },
+                #'CONN_MAX_AGE': 30, # Bağlantı ömrü (saniye cinsinden)
+                "TEST": {
+                    "NAME": "marswidedb_test",
+                },
+            }
     }
 else:
     DATABASES = {
