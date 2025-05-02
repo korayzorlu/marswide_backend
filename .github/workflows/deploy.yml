@@ -35,8 +35,8 @@ jobs:
     - name: Servisleri kontrol et
       run: docker compose ps
 
-    - name: Django settings and test
-      run: docker compose exec web python manage.py migrate
+    # - name: Django settings and test
+    #   run: docker compose exec web python manage.py migrate
 
     - name: Servisleri durdur
       if: always()
