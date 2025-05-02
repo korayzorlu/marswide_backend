@@ -44,12 +44,10 @@ jobs:
 
     - name: Create DB user and database if not exists
       run: |
-        docker-compose exec db psql -U postgres -c "
-            CREATE USER mars WITH PASSWORD '9527';
-            CREATE DATABASE marswidedb;
-            GRANT ALL PRIVILEGES ON DATABASE marswidedb TO mars;
-            ALTER DATABASE marswidedb OWNER TO mars;
-        "
+        docker-compose run --rm db psql -U postgres -c "CREATE USER mars WITH PASSWORD '9527';" || true
+        docker-compose run --rm db psql -U postgres -c "CREATE DATABASE marswidedb;" || true
+        docker-compose run --rm db psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE marswidedb TO mars;" || true
+        docker-compose run --rm db psql -U postgres -c "ALTER DATABASE marswidedb OWNER TO mars;" || true
 
     
     - name: Wait for PostgreSQL
