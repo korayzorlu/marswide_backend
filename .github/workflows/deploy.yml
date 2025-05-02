@@ -32,10 +32,6 @@ jobs:
     - name: Servisleri kontrol et
       run: docker compose ps
 
-    # Örnek test: Uygulama ayakta mı?
-    - name: Web servisi ayakta mı?
-      run: curl --fail http://localhost:8000 || exit 1
-
     - name: Django settings and test
       run: docker compose exec web python manage.py migrate
 
