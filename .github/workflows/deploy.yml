@@ -20,9 +20,10 @@ jobs:
         python-version: '3.12'
 
     - name: .env dosyasını oluştur
-      run: cat <<EOF > .env
-           ${{ secrets.ENV_FILE }}
-           EOF
+      run: |
+            cat > .env << 'EOF'
+            ${{ secrets.ENV_FILE }}
+            EOF
     - run: cat .env
     
     - name: Docker Compose network oluştur (external network varsa)
