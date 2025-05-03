@@ -71,7 +71,7 @@ class UpdateCompanyView(LoginRequiredMixin,View):
         if not name or not formal_name:
             return JsonResponse({'message': 'Register failed! Fill required fields.','status':'error'}, status=400)
         
-        company = Company.objects.filter(id = int(id), company_users__is_admin = True, company_users__user = self.request.user).first()
+        company = Company.objects.filter(uuid = str(id), company_users__is_admin = True, company_users__user = self.request.user).first()
 
         if not company:
             return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
@@ -105,7 +105,7 @@ class DeleteCompanyView(LoginRequiredMixin,View):
         id = data.get('id')
         
         user_companies = UserCompany.objects.filter(user = request.user).order_by("company__name")
-        user_company = user_companies.filter(id = int(id)).first()
+        user_company = user_companies.filter(uuid = str(id)).first()
 
         company = Company.objects.filter(id = user_company.company.id, user = request.user).first()
 
@@ -133,7 +133,7 @@ class UpdateUserCompanyView(LoginRequiredMixin,View):
         status = data.get('status')
         
         user_companies = UserCompany.objects.filter(user__email = user_email).order_by("company__name")
-        user_company = user_companies.filter(id = int(id)).first()
+        user_company = user_companies.filter(uuid = str(id)).first()
 
         if not user_company:
             return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
@@ -165,7 +165,7 @@ class DeleteUserCompanyView(LoginRequiredMixin,View):
         user_email = data.get('userEmail')
         
         user_companies = UserCompany.objects.filter(user__email = user_email).order_by("company__name")
-        user_company = user_companies.filter(id = int(id)).first()
+        user_company = user_companies.filter(uuid = str(id)).first()
 
         if not user_company:
             return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)

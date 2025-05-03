@@ -15,6 +15,7 @@ from rest_framework import status
 from core.permissions import SubscriptionPermission,BlockBrowserAccessPermission,RequireCustomHeaderPermission
 
 from .serializers import *
+from .filters import *
 
 class QueryListAPIView(generics.ListAPIView):
     def get_queryset(self):
@@ -79,9 +80,7 @@ class QueryListAPIView(generics.ListAPIView):
 
 class CompanyList(ModelViewSet, QueryListAPIView):
     serializer_class = CompanyListSerializer
-    filterset_fields = {
-                        'user': ['exact','in', 'isnull'],
-    }
+    filterset_class = CompanyFilter
     filter_backends = [OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'
     required_subscription = "free"
@@ -105,13 +104,12 @@ class CompanyList(ModelViewSet, QueryListAPIView):
 
 class UserCompanyList(ModelViewSet, QueryListAPIView):
     serializer_class = UserCompanyListSerializer
-    filterset_fields = {
-                        'user': ['exact','in', 'isnull'],
-    }
+    filterset_class = UserCompanyFilter
     filter_backends = [OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'
     required_subscription = "free"
     permission_classes = [SubscriptionPermission]
+    lookup_field = 'uuid'
     
     def get_queryset(self):
         custom_related_fields = ["user","company"]
