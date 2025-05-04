@@ -61,3 +61,5 @@ jobs:
           git pull origin master
           docker-compose down --remove-orphans && docker-compose -f docker-compose.prod.yml up --build -d
           docker-compose exec web python manage.py migrate
+
+          
