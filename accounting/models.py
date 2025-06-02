@@ -151,7 +151,7 @@ class Transaction(models.Model):
             if txn.type == 'debit':
                 self.account.balance += txn.amount
             elif txn.type == 'credit':
-                self.account.balance -= txn.amount
+                self.account.balance -= txn.amount 
 
         if txn.account.type.code == 'capital':
             if txn.type == 'debit':
