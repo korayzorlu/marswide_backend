@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/mikro/', include("mikro.urls")),
     path('api/notifications/', include("notifications.urls")),
     path('api/partners/', include("partners.urls")),
+    path('api/products/', include("products.urls")),
     path('api/subscriptions/', include("subscriptions.urls")),
     path('api/users/', include("users.urls")),
     

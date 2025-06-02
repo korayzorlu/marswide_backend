@@ -28,15 +28,25 @@ class AddAccountView(LoginRequiredMixin,View):
         if not company or not active_company:
             return JsonResponse({'message': 'Sorry, something went wrong!','status':'error'}, status=400)
         
-        partner = Partner.objects.filter(uuid = data.get('partner').get('uuid')).first()
+        if data.get('partner'):
+            partner = Partner.objects.filter(uuid = data.get('partner').get('uuid')).first()
+        else:
+            partner = None
+            
         currency = Currency.objects.filter(code = data.get('currency') if data.get('currency') else 0).first()
 
-        if Account.objects.filter(partner=partner,currency=currency).exists():
-            return JsonResponse({'message': 'An account with this currency already exists for this partner.','status':'error'}, status=400)
+        type = AccountType.objects.filter(code=data.get('type')).first()
+
+        if data.get('type') == "receivable" or data.get('type') == "payable" or data.get('type') == "shareholder":
+            if Account.objects.filter(partner=partner,currency=currency).exists():
+                return JsonResponse({'message': 'An account with this currency already exists for this partner.','status':'error'}, status=400)
+        else:
+            if Account.objects.filter(type=type,currency=currency).exists():
+                return JsonResponse({'message': 'An account with this currency already exists for this partner.','status':'error'}, status=400)
 
         account = Account.objects.create(
             company = company,
-            type = data.get('type'),
+            type = type,
             partner = partner,
             currency = currency,
         )
@@ -62,7 +72,7 @@ class UpdateAccountView(LoginRequiredMixin,CompanyOwnershipRequiredMixin,View):
             if partner != obj.partner or currency != obj.currency:
                 return JsonResponse({'message': 'Transactions are linked to this account, partner or currency cannot be changed.','status':'error'}, status=400)
         
-        obj.type = data.get('type')
+        obj.type = AccountType.objects.filter(code=data.get('type')).first()
         obj.partner = partner
         obj.currency = currency
         obj.save()

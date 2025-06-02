@@ -34,6 +34,7 @@ class AddPaymentView(LoginRequiredMixin,View):
         obj = Payment.objects.create(
             company = company,
             type = data.get('type'),
+            receiver = "bank" if data.get('receiver') == "Bank" else "cash",
             partner = partner,
             currency = currency,
             amount = Decimal(str(data.get('amount'))),
@@ -57,6 +58,7 @@ class UpdatePaymentView(LoginRequiredMixin,CompanyOwnershipRequiredMixin,View):
 
         obj = Payment.objects.filter(uuid = data.get('uuid')).first()
         obj.type = data.get('type')
+        obj.receiver = "bank" if data.get('receiver') == "Bank" else "cash"
         obj.partner = partner
         obj.currency = currency
         obj.amount = Decimal(str(data.get('amount')))

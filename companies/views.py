@@ -8,6 +8,7 @@ from django.utils.crypto import get_random_string
 
 from .models import *
 from users.models import User
+from common.models import Currency
 
 import os
 import json
@@ -266,3 +267,22 @@ class ConfirmInvitationView(LoginRequiredMixin,View):
             invitation.save()
 
             return JsonResponse({'message':'Declined invitation!','status':'success'}, status=200)
+        
+class DisplayCurrencySettingsView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+
+        active_company = UserCompany.objects.filter(uuid = data.get('activeCompanyUUID')).first()
+
+        company = Company.objects.filter(uuid = active_company.company.uuid, company_users__user = self.request.user).first()
+
+        if not company:
+            return JsonResponse({'message' : 'Sorry, something went wrong!','status':'error'}, status=400)
+
+        if not data.get('displayCurrency'):
+            return JsonResponse({'message': 'Fill required fields.','status':'error'}, status=400)
+        
+        active_company.display_currency = Currency.objects.filter(code = data.get('displayCurrency')).first()
+        active_company.save()
+
+        return JsonResponse({'message': 'Saved successfully!','status':'success'}, status=200)

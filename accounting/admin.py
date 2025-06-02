@@ -5,7 +5,32 @@ from .models import *
 
 # Register your models here.
 
+@admin.register(AccountCategory)
+class AccountCategoryAdmin(admin.ModelAdmin):
+    list_display = ["code","name"]
+    list_display_links = ["name"]
+    search_fields = ["code","name"]
+    list_filter = []
+    inlines = []
+    ordering = ["code"]
+    
+    class Meta:
+        model = AccountCategory
 
+@admin.register(AccountType)
+class AccountTypeAdmin(admin.ModelAdmin):
+    list_display = ["category","code","name"]
+    list_display_links = ["name"]
+    search_fields = ["code","name","category__name"]
+    list_filter = []
+    inlines = []
+    ordering = ["category__name","code"]
+
+    def category(self,obj):
+        return obj.category.name if obj.category else ""
+    
+    class Meta:
+        model = AccountType
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):

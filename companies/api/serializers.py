@@ -44,6 +44,7 @@ class UserCompanyListSerializer(serializers.Serializer):
     is_active = serializers.BooleanField()
     is_admin = serializers.BooleanField()
     userImage = serializers.SerializerMethodField()
+    display_currency = serializers.SerializerMethodField()
     
     def get_user(self, obj):
         return obj.user.email if obj.user else ''
@@ -68,6 +69,9 @@ class UserCompanyListSerializer(serializers.Serializer):
                 return request.build_absolute_uri(image_url)
             return image_url
         return ''
+    
+    def get_display_currency(self, obj):
+        return obj.display_currency.code if obj.display_currency else ''
     
     def update(self, instance, validated_data):
         info = model_meta.get_field_info(instance)

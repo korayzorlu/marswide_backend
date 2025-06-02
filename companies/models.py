@@ -5,11 +5,17 @@ from django.contrib.auth import get_user_model
 import uuid
 from django.utils.translation import gettext_lazy as _
 
+
+
 # Create your models here.
 
 def get_sentinel_user():
     User = get_user_model()
     return User.objects.get_or_create(username="unknown")[0]
+
+def get_default_currency():
+    from common.models import Currency
+    return Currency.objects.get(code="USD").id
 
 class Company(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
@@ -33,6 +39,8 @@ class UserCompany(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_users")
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+
+    display_currency = models.ForeignKey("common.currency", on_delete=models.CASCADE, default=get_default_currency, related_name="currency_user_companies")
 
     class Meta:
         unique_together = ('user', 'company')

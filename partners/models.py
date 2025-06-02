@@ -21,6 +21,7 @@ class Partner(models.Model):
     TYPES_CHOICES = (
         ('customer', ('Customer')),
         ('supplier', ('Supplier')),
+        ('shareholder', ('Shareholder')),
     )
     types = ArrayField(models.CharField(_("Status"), max_length=25, choices=TYPES_CHOICES), default=list, blank=True, null=True)
     vat_office = models.CharField(_("Vat Office"), max_length=50, blank=True, null=True)

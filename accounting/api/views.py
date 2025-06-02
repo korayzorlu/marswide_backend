@@ -111,7 +111,7 @@ class AccountFilter(FilterSet):
         return queryset.filter(uuid = value)
     
     def filter_type(self, queryset, type, value):
-        return queryset.filter(type = value)
+        return queryset.filter(type__code = value)
     
     def filter_partner(self, queryset, partner, value):
         return queryset.filter(partner__uuid = value)
@@ -189,7 +189,7 @@ class TransactionList(ModelViewSet, QueryListAPIView):
 
         custom_related_fields = ["account__partner","account__currency"]
 
-        queryset = Transaction.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("account__partner__name")
+        queryset = Transaction.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("-date")
 
         query = self.request.query_params.get('search[value]', None)
         if query:
@@ -235,7 +235,7 @@ class InvoiceList(ModelViewSet, QueryListAPIView):
 
         custom_related_fields = ["partner","currency"]
 
-        queryset = Invoice.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("partner__name","date")
+        queryset = Invoice.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("-date")
 
         query = self.request.query_params.get('search[value]', None)
         if query:
@@ -263,7 +263,7 @@ class PaymentList(ModelViewSet, QueryListAPIView):
 
         custom_related_fields = ["partner","currency"]
 
-        queryset = Payment.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("partner__name","date")
+        queryset = Payment.objects.select_related(*custom_related_fields).filter(company = active_company.company if active_company else None).order_by("-date")
 
         query = self.request.query_params.get('search[value]', None)
         if query:

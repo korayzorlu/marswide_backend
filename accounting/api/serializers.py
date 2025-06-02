@@ -9,7 +9,7 @@ class AccountListSerializer(serializers.Serializer):
     partner = serializers.SerializerMethodField()
     currency = serializers.SerializerMethodField()
     #accounts = serializers.SerializerMethodField()
-    type = serializers.CharField()
+    type = serializers.SerializerMethodField()
     balance = serializers.DecimalField(max_digits=14,decimal_places=2)
     
     def get_companyId(self, obj):
@@ -20,6 +20,9 @@ class AccountListSerializer(serializers.Serializer):
     
     def get_currency(self, obj):
         return obj.currency.code if obj.currency else ''
+    
+    def get_type(self, obj):
+        return obj.type.code if obj.type else ''
     
     def get_accounts(self, obj):
         account_list = []
@@ -95,7 +98,7 @@ class TransactionListSerializer(serializers.Serializer):
             field.set(value)
         
         return instance
-    
+     
 class InvoiceListSerializer(serializers.Serializer):
     uuid = serializers.CharField()
     companyId = serializers.SerializerMethodField()
@@ -104,6 +107,7 @@ class InvoiceListSerializer(serializers.Serializer):
     invoice_no = serializers.CharField()
     type = serializers.CharField()
     amount = serializers.DecimalField(max_digits=14,decimal_places=2)
+    date = serializers.DateTimeField()
     
     def get_companyId(self, obj):
         return obj.company.id if obj.company else ''
@@ -113,9 +117,6 @@ class InvoiceListSerializer(serializers.Serializer):
     
     def get_currency(self, obj):
         return obj.currency.code if obj.currency else ''
-    
-    # def get_type(self, obj):
-    #     return obj.get_type_display()
 
 class PaymentListSerializer(serializers.Serializer):
         uuid = serializers.CharField()
@@ -124,7 +125,9 @@ class PaymentListSerializer(serializers.Serializer):
         currency = serializers.SerializerMethodField()
         payment_no = serializers.CharField()
         type = serializers.CharField()
+        receiver = serializers.SerializerMethodField()
         amount = serializers.DecimalField(max_digits=14,decimal_places=2)
+        date = serializers.DateTimeField()
         
         def get_companyId(self, obj):
             return obj.company.id if obj.company else ''
@@ -134,3 +137,6 @@ class PaymentListSerializer(serializers.Serializer):
         
         def get_currency(self, obj):
             return obj.currency.code if obj.currency else ''
+        
+        def get_receiver(self, obj):
+            return obj.get_receiver_display() if obj.receiver else ''

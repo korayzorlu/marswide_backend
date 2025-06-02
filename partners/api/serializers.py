@@ -12,6 +12,7 @@ class PartnerListSerializer(serializers.Serializer):
     types = serializers.ListField()
     customer = serializers.SerializerMethodField()
     supplier = serializers.SerializerMethodField()
+    shareholder = serializers.SerializerMethodField()
     companyId = serializers.SerializerMethodField()
     vatOffice = serializers.CharField(source = "vat_office")
     vatNo = serializers.CharField(source = "vat_no")
@@ -37,6 +38,9 @@ class PartnerListSerializer(serializers.Serializer):
     
     def get_supplier(self, obj):
         return True if "supplier" in obj.types else False
+
+    def get_shareholder(self, obj):
+        return True if "shareholder" in obj.types else False
     
     def get_country(self, obj):
         return obj.country.iso2 if obj.country else ''

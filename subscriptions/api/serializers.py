@@ -15,6 +15,10 @@ class MenuItemListSerializer(serializers.Serializer):
                 {"type" : "item", "class" : "free", "label" : "Invitations", "icon" : "mail", "route" : "/invitations"}
             ]},
             {"type" : "item", "class" : "free", "label" : "Partners", "icon" : "handshake", "route" : "/partners"},
+            {"type" : "sub_menu", "class" : "free", "label" : "Inventory", "icon" : "inventory", "items" : [
+                {"type" : "item", "class" : "free", "label" : "Categories", "icon" : "tree", "route" : "/categories"},
+                {"type" : "item", "class" : "free", "label" : "Products", "icon" : "box", "route" : "/products"}
+            ]},
             {"type" : "sub_menu", "class" : "free", "label" : "Accounting", "icon" : "accounting", "items" : [
                 {"type" : "item", "class" : "free", "label" : "Accounts", "icon" : "account", "route" : "/accounts"},
                 {"type" : "item", "class" : "free", "label" : "Invoices", "icon" : "invoice", "route" : "/invoices"},
