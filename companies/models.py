@@ -15,7 +15,7 @@ def get_sentinel_user():
 
 def get_default_currency():
     from common.models import Currency
-    return Currency.objects.get(code="USD").id
+    return 145
 
 class Company(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
